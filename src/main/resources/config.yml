@@ -1,0 +1,5 @@
+select-ticks: 300
+day-ticks: 300
+night-ticks: 300
+mafia-number: 1
+citizen-number: 1

@@ -1,0 +1,8 @@
+name: Mafia
+version: 0.1
+main: heartin.plugin.mafia.GamePlugin
+depend: [Nemo]
+
+commands:
+  game:
+    usage: /<command> help
