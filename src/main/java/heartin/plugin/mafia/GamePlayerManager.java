@@ -15,6 +15,14 @@ public final class GamePlayerManager {
     private final Map<GamePlayer, Ability> mafia;
     private final Map<GamePlayer, Ability> doctor;
     private final Map<GamePlayer, Ability> police;
+    private final Set<GamePlayer> onlineCitizen;
+    private final Set<GamePlayer> onlineMafia;
+    private final Set<GamePlayer> onlineDoctor;
+    private final Set<GamePlayer> onlinePolice;
+    private Set<GamePlayer> unmodifiableMafia;
+    private Set<GamePlayer> unmodifiableDoctor;
+    private Set<GamePlayer> unmodifiablePolice;
+    private Set<GamePlayer> unmodifiableCitizen;
     private Collection<GamePlayer> unmodifiablePlayers;
     private Collection<GamePlayer> unmodifiableOnlinePlayers;
 
@@ -52,6 +60,10 @@ public final class GamePlayerManager {
         this.mafia = new HashMap(size);
         this.doctor = new HashMap(size);
         this.police = new HashMap(size);
+        this.onlineCitizen = new HashSet(size);
+        this.onlineMafia = new HashSet(size);
+        this.onlineDoctor = new HashSet(size);
+        this.onlinePolice = new HashSet(size);
     }
 
     void registerGamePlayer(Player player) {
@@ -59,7 +71,7 @@ public final class GamePlayerManager {
 
         if (gamePlayer != null) {
             gamePlayer.setPlayer(player);
-            this.playersByPlayer.put(player, gamePlayer);
+
         }
     }
 
@@ -76,39 +88,85 @@ public final class GamePlayerManager {
         GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
 
         this.mafia.put(gamePlayer, new Mafia(gamePlayer));
+        this.onlineMafia.add(gamePlayer);
+        process.getScoreboard().setMafia(gamePlayer.getName());
 
         return gamePlayer;
     }
 
-    public GamePlayer getMafia(Player player) {
-        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+    public Set<GamePlayer> getOnlineMafia() {
 
-        this.mafia.get(gamePlayer);
+        Set mafia = this.unmodifiableMafia;
 
-        return gamePlayer;
+        if (mafia == null) {
+            this.unmodifiableMafia = (mafia = Collections.unmodifiableSet(this.onlineMafia));
+        }
+
+        return mafia;
     }
 
     public GamePlayer setCitizen(Player player) {
         GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
 
         this.citizen.put(gamePlayer, new Citizen(gamePlayer));
+        this.onlineCitizen.add(gamePlayer);
+        process.getScoreboard().setCitizen(gamePlayer.getName());
+
 
         return gamePlayer;
     }
+
+
+    public Set<GamePlayer> getOnlineCitizen() {
+
+        Set citizen = this.unmodifiableCitizen;
+
+        if (citizen == null) {
+            this.unmodifiableCitizen = (citizen = Collections.unmodifiableSet(this.onlineCitizen));
+        }
+        return citizen;
+    }
+
 
     public GamePlayer setDoctor(Player player) {
         GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
 
         this.doctor.put(gamePlayer, new Doctor(gamePlayer));
+        this.onlineDoctor.add(gamePlayer);
+        process.getScoreboard().setDoctor(gamePlayer.getName());
+
 
         return gamePlayer;
+    }
+
+    public Set<GamePlayer> getOnlineDoctor() {
+
+        Set doctor = this.unmodifiableDoctor;
+
+        if (doctor == null) {
+            this.unmodifiableDoctor = (doctor = Collections.unmodifiableSet(this.onlineDoctor));
+        }
+        return doctor;
     }
 
     public GamePlayer setPolice(Player player) {
         GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
 
         this.police.put(gamePlayer, new Police(gamePlayer));
+        this.onlinePolice.add(gamePlayer);
+        process.getScoreboard().setPolice(gamePlayer.getName());
+
         return gamePlayer;
+    }
+
+    public Set<GamePlayer> getOnlinePolice() {
+
+        Set police = this.unmodifiablePolice;
+
+        if (police == null) {
+            this.unmodifiablePolice = (police = Collections.unmodifiableSet(this.onlinePolice));
+        }
+        return police;
     }
 
     public GamePlayer getGamePlayer(Player player) {

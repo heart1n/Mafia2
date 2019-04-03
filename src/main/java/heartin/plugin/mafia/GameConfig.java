@@ -7,12 +7,12 @@ public class GameConfig {
     public static int nightTicks;
     public static int mafiaNumber;
     public static int citizenNumber;
-    public static int selectTicks;
+    public static int waitTicks;
 
 
     static void load(FileConfiguration config) {
 
-        selectTicks = config.getInt("select-ticks");
+        waitTicks = config.getInt("wait-ticks");
         dayTicks = config.getInt("day-ticks");
         nightTicks = config.getInt("night-ticks");
         mafiaNumber = config.getInt("mafia-number");

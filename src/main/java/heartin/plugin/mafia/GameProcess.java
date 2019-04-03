@@ -10,10 +10,12 @@ public final class GameProcess {
     private final GamePlayerManager playerManager;
     private final GameListener listener;
     private final GameScheduler scheduler;
+    private final GameScoreboard scoreboard;
     private final BukkitTask bukkitTask;
 
     GameProcess(GamePlugin plugin) {
         this.plugin = plugin;
+        this.scoreboard = new GameScoreboard(this);
         this.playerManager = new GamePlayerManager(this);
         this.listener = new GameListener(this);
         this.scheduler = new GameScheduler(this);
@@ -23,24 +25,34 @@ public final class GameProcess {
 
     }
 
-    public GamePlugin getPlugin() {
+    public GamePlugin getPlugin()
+    {
         return this.plugin;
     }
 
-    public GamePlayerManager getPlayerManager() {
+    public GamePlayerManager getPlayerManager()
+    {
         return this.playerManager;
     }
 
     public GameScheduler getScheduler() {
+
         return this.scheduler;
+    }
+
+    public GameScoreboard getScoreboard()
+    {
+        return this.scoreboard;
     }
 
     void unregister() {
 
         HandlerList.unregisterAll(this.listener);
 
+        this.scoreboard.clear();
         this.bukkitTask.cancel();
 
+        GameScheduler.remainbar.removeAll();
         GamePlayerManager playerManager = this.playerManager;
     }
 }

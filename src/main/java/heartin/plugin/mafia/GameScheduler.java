@@ -1,22 +1,25 @@
 package heartin.plugin.mafia;
 
-import heartin.plugin.mafia.Ability.Ability;
 import nemo.mc.packet.Packet;
 import org.bukkit.Bukkit;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarFlag;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
 public final class GameScheduler implements Runnable {
+
+    public static BossBar remainbar = Bukkit.createBossBar("§c남은 시간 : §e<remainTime> §7초", BarColor.WHITE, BarStyle.SOLID, new BarFlag[]{BarFlag.PLAY_BOSS_MUSIC});
+
     final GameProcess process;
     private GameTask task;
-
-    private HashMap<GamePlayer, Boolean> AbilitySelect = new HashMap<>();
 
     GameScheduler(GameProcess process) {
         this.process = process;
@@ -28,28 +31,48 @@ public final class GameScheduler implements Runnable {
         this.task = this.task.run();
     }
 
-    private class DayTask implements GameTask {
+    /*private class VoteTask implements GameTask {
+        private int remainTicks = GameConfig.nightTicks;
 
-        private int remainTicks = GameConfig.dayTicks;
-
-        DayTask() {
+        VoteTask() {
             updateTime();
         }
 
         public GameTask run() {
-
             if (--this.remainTicks > 0) {
                 updateTime();
 
-                //Bukkit.broadcastMessage("remainTicks: " + remainTicks);
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineCitizen()) {
+                    Message.sendCitizen(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineDoctor()) {
+                    Message.sendDoctor(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePolice()) {
+                    Message.sendPolice(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
+                    Message.sendMafia(gamePlayer);
+                }
+
+
                 return this;
             }
-            Bukkit.broadcastMessage("test task1");
+            //task run
 
+            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers())
+            {
+                Player player = gamePlayer.getPlayer();
+
+                Packet titlePacket = Packet.TITLE.compound("§6투표시간이 되었습니다", "§7투표를 진행해주세요.", 5, 60, 10);
+                titlePacket.send(player);
+            }
+
+            Bukkit.broadcastMessage("test task2");
 
             GameProcess process = GameScheduler.this.process;
-
             process.getPlugin().processStop();
+
             return this;
         }
 
@@ -60,7 +83,14 @@ public final class GameScheduler implements Runnable {
                 if (remainTicks % 2 == 0) {
                     int seconds = remainTicks / 20;
 
-                    //  GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§lNemo §f§l%02d:%02d§r  ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                    for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
+                        Player player = gamePlayer.getPlayer();
+
+                        remainbar.addPlayer(player);
+                    }
+
+                    remainbar.setTitle(String.format("§d남은시간§r§l %02d:%02d§r ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§l남은시간 §f§l%02d:%02d§r  ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                 }
             } else {
                 remainTicks += 19;
@@ -69,21 +99,171 @@ public final class GameScheduler implements Runnable {
                     char color = remainTicks / 5 % 2 == 0 ? 'f' : 'c';
                     int seconds = remainTicks / 20;
 
-                    //GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§lNemo §%c§l%02d:%02d§r  ", new Object[] { Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60) }));
+                    remainbar.setTitle(String.format("§d남은시간 §%c§l%02d:%02d§r ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§lNemo §%c§l%02d:%02d§r  ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                }
+            }
+        }
+    }*/
+
+    private class DayTask implements GameTask {
+
+        private int remainTicks = GameConfig.dayTicks;
+
+        DayTask() {
+
+            updateTime();
+        }
+
+        public GameTask run() {
+
+            if (--this.remainTicks > 0) {
+                updateTime();
+
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineCitizen()) {
+                    Message.sendCitizen(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineDoctor()) {
+                    Message.sendDoctor(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePolice()) {
+                    Message.sendPolice(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
+                    Message.sendMafia(gamePlayer);
+                }
+
+                return this;
+            }
+            // Task run
+
+            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers())
+            {
+                Player player = gamePlayer.getPlayer();
+
+                Packet titlePacket = Packet.TITLE.compound("§6아침이 되었습니다.", "§7대화를 진행하세요.", 5, 60, 10);
+                titlePacket.send(player);
+            }
+            Bukkit.broadcastMessage("test task1");
+
+
+          // GameProcess process = GameScheduler.this.process;
+       //     process.getPlugin().processStop();
+
+            return new WaitTask();
+        }
+
+        private void updateTime() {
+                        int remainTicks = this.remainTicks;
+
+                        if (remainTicks > 100) {
+                            if (remainTicks % 2 == 0) {
+                                int seconds = remainTicks / 20;
+
+                    for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
+                        Player player = gamePlayer.getPlayer();
+
+                        remainbar.addPlayer(player);
+                    }
+
+                    remainbar.setColor(BarColor.PINK);
+                    remainbar.setTitle(String.format("§d남은시간§r§l %02d:%02d§r ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format("§d§l남은시간 §f§l%02d:%02d§r  ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                }
+            } else {
+                remainTicks += 19;
+
+                if (remainTicks % 5 == 0) {
+                    char color = remainTicks / 5 % 2 == 0 ? 'f' : 'c';
+                    int seconds = remainTicks / 20;
+
+                    remainbar.setTitle(String.format("§d남은시간 §%c§l%02d:%02d§r ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§남은시간 §%c§l%02d:%02d§r  ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                 }
             }
         }
     }
+
+    private class WaitTask implements  GameTask {
+
+        private int remainTicks = GameConfig.waitTicks;
+
+        WaitTask()
+        {
+            updateTime();
+        }
+        @Override
+        public GameTask run() {
+
+            if (--this.remainTicks > 0) {
+                updateTime();
+
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineCitizen()) {
+                    Message.sendCitizen(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineDoctor()) {
+                    Message.sendDoctor(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePolice()) {
+                    Message.sendPolice(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
+                    Message.sendMafia(gamePlayer);
+                }
+                return this;
+            }
+
+            Bukkit.broadcastMessage("test task0");
+
+            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers())
+            {
+                Player player = gamePlayer.getPlayer();
+                player.sendMessage("잠시 후 게임이 시작됩니다.");
+                player.sendMessage("테스트 메시지 123 조금만 기다려주세요");
+            }
+
+            return new DayTask();
+        }
+        private void updateTime() {
+            int remainTicks = this.remainTicks;
+
+            if (remainTicks > 100) {
+                if (remainTicks % 2 == 0) {
+                    int seconds = remainTicks / 20;
+
+                    for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
+                        Player player = gamePlayer.getPlayer();
+
+                        remainbar.addPlayer(player);
+                    }
+
+                    remainbar.setColor(BarColor.BLUE);
+                    remainbar.setTitle(String.format("§d남은시간§r§l %02d:%02d§r ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format("§d§l남은시간 §f§l%02d:%02d§r  ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                }
+            } else {
+                remainTicks += 19;
+
+                if (remainTicks % 5 == 0) {
+                    char color = remainTicks / 5 % 2 == 0 ? 'f' : 'c';
+                    int seconds = remainTicks / 20;
+
+                    remainbar.setTitle(String.format("§d남은시간 §%c§l%02d:%02d§r ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§l남은시간 §%c§l%02d:%02d§r  ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                }
+            }
+        }
+    }
+
     /*
      *      /game start - > SelectAbility Task Run
      *
      * */
     private class SelectAbility implements GameTask {
 
-        private int remainTicks = GameConfig.selectTicks;
 
         public SelectAbility() {
-            updateTime();
+
         }
 
         public GameTask run() {
@@ -101,21 +281,16 @@ public final class GameScheduler implements Runnable {
                 Player player = mafia.getPlayer();
                 process.getPlayerManager().setMafia(player);
 
-                player.sendMessage("마피아");
             }
 
             if (doctor.isOnline()) {
                 Player player = doctor.getPlayer();
-                process.getPlayerManager().setMafia(player);
-
-                player.sendMessage("의사");
+                process.getPlayerManager().setDoctor(player);
             }
 
             if (police.isOnline()) {
                 Player player = police.getPlayer();
                 process.getPlayerManager().setPolice(player);
-
-                player.sendMessage("경찰");
             }
 
             for (GamePlayer gamePlayer : citizens) {
@@ -124,10 +299,6 @@ public final class GameScheduler implements Runnable {
                 Player player = gamePlayer.getPlayer();
 
                 process.getPlayerManager().setCitizen(player);
-
-                Packet titlePacket = Packet.TITLE.compound("§6난 시민이다", "§7시민이당당", 5, 60, 10);
-                titlePacket.send(player);
-                player.sendMessage("시민");
             }
 
             for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
@@ -135,22 +306,13 @@ public final class GameScheduler implements Runnable {
                 Player player = gamePlayer.getPlayer();
 
                 player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 10), true);
-              //  Packet titlePacket = Packet.TITLE.compound("§6Title Messasge", "§7SubTitle Message", 5, 60, 10);
-               // titlePacket.send(player);
+                Packet titlePacket = Packet.TITLE.compound("§6마피아 게임을 시작합니다", "§7직업을 확인해주세요.", 5, 60, 10);
+                titlePacket.send(player);
+
+                process.getScoreboard().registerPlayer(gamePlayer);
             }
 
-            return new DayTask();
-        }
-
-        private void updateTime() {
-            int remainTicks = this.remainTicks;
-
-            if (remainTicks > 100) {
-                if (remainTicks % 2 == 0) {
-                    int seconds = remainTicks / 20;
-                    //  GameScheduler.this.process.getScoreboard().setDisplayName(String.format("GameTime", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds & 60)}));
-                }
-            }
+            return new WaitTask();
         }
     }
 }
