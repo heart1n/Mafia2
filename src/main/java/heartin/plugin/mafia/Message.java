@@ -13,7 +13,7 @@ public class Message {
         Player player = gamePlayer.getPlayer();
 
         TextComponentBuilder builder = TextComponent.builder();
-        builder.object().text("§6당신의 §7직업 §r: 시민");
+        builder.object().text("§6당신의 §r직업 §r: 시민");
 
         Packet.INFO.chat(builder.build(), ChatType.GAME_INFO).send((Player) player);
     }
@@ -23,7 +23,7 @@ public class Message {
         Player player = gamePlayer.getPlayer();
 
         TextComponentBuilder builder = TextComponent.builder();
-        builder.object().text("§6당신의 §7직업 §r: §c마피아");
+        builder.object().text("§6당신의 §r직업 §r: §c마피아");
 
         Packet.INFO.chat(builder.build(), ChatType.GAME_INFO).send((Player) player);
     }
@@ -33,7 +33,7 @@ public class Message {
         Player player = gamePlayer.getPlayer();
 
         TextComponentBuilder builder = TextComponent.builder();
-        builder.object().text("§6당신의 §7직업 §r: §a의사");
+        builder.object().text("§6당신의 §r직업 §r: §a의사");
 
         Packet.INFO.chat(builder.build(), ChatType.GAME_INFO).send((Player) player);
     }
@@ -43,7 +43,7 @@ public class Message {
         Player player = gamePlayer.getPlayer();
 
         TextComponentBuilder builder = TextComponent.builder();
-        builder.object().text("§6당신의 §7직업 §r: §b경찰");
+        builder.object().text("§6당신의 §r직업 §r: §b경찰");
 
         Packet.INFO.chat(builder.build(), ChatType.GAME_INFO).send((Player) player);
     }

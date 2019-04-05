@@ -8,7 +8,7 @@ public final class Police extends Ability {
 
     public Police(GamePlayer gamePlayer) {
 
-        super(gamePlayer, "Police", Type.CITIZEN, 4, description);
+        super(gamePlayer, "Police", Type.CITIZEN, description);
     }
 
     public String[] getDescription(String[] description)

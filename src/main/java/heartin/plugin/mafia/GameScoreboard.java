@@ -30,7 +30,7 @@ final class GameScoreboard {
 
         ScoreboardManager manager = ScoreboardManager.getInstance();
         Scoreboard scoreboard = manager.newScoreboard();
-        Objective objective = scoreboard.registerObjective("MafiaGame");
+        Objective objective = scoreboard.registerObjective(OBJECTIVE_NAME);
         objective.setDisplayName(this.displayNameForCitizen = this.displayNameForMafia = this.displayNameForPolice = this.displayNameForDoctor =  "§bMafia Games");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
@@ -123,11 +123,6 @@ final class GameScoreboard {
         }
     }
 
-    void updateDisplayNameForMafia(Player player) {
-        Packet.SCOREBAORD.scoreboardDisplayName("GameName", this.displayNameForMafia).send(player);
-    }
-
-
     void setCitizen(String entry)
     {
         this.citizen.addEntry(entry);
@@ -148,16 +143,30 @@ final class GameScoreboard {
         this.doctor.addEntry(entry);
     }
 
+    void setMedium(String entry)
+    {
+
+    }
+    void setSoldier(String entry)
+    {
+
+    }
+
+    void setSpy(String entry)
+    {
+
+    }
+
     void setScore(int score)
     {
         this.score.setScore(score);
     }
 
+
     void registerPlayer(GamePlayer gamePlayer) {
         Player player = gamePlayer.getPlayer();
 
         this.scoreboard.registerPlayer(player);
-
 
         Packet.SCOREBAORD.scoreboardDisplayName("Citizen", this.displayNameForCitizen).send(player);
         Packet.SCOREBAORD.scoreboardDisplayName("Mafia", this.displayNameForMafia).send(player);

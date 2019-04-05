@@ -8,7 +8,7 @@ public class Mafia extends Ability {
 
     public Mafia(GamePlayer gamePlayer) {
 
-        super(gamePlayer, "Mafia", Type.MAFIA, 2, description);
+        super(gamePlayer, "Mafia", Type.MAFIA, description);
     }
 
     public String[] getDescription(String[] description)

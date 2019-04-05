@@ -13,7 +13,7 @@ apply plugin: 'java'
 apply plugin: "com.nemosw.copy-jar"
 
 copyJar {
-    into 'C:/Users/heartin/Desktop/1.12.2/plugins'
+    into 'C:/Users/sandbox/Desktop/Server/1.12.2/MS/plugins'
 }
 
 group = pluginGroup

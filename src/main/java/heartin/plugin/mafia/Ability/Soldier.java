@@ -2,13 +2,12 @@ package heartin.plugin.mafia.Ability;
 
 import heartin.plugin.mafia.GamePlayer;
 
-public class Doctor extends Ability {
+public class Soldier extends Ability{
 
     private static String[] description = {""};
 
-    public Doctor(GamePlayer gamePlayer) {
-
-        super(gamePlayer, "Doctor", Type.CITIZEN, description);
+    public Soldier(GamePlayer gamePlayer) {
+        super(gamePlayer, "Soldier", Type.CITIZEN, description);
     }
 
     public String[] getDescription(String[] description)
@@ -16,9 +15,9 @@ public class Doctor extends Ability {
         return description;
     }
 
-    public String getAbilityType(String abilityType)
+    public String getAbilityName(String abilityName)
     {
-        return abilityType;
+        return abilityName;
     }
 
 }

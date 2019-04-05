@@ -1,5 +1,6 @@
 package heartin.plugin.mafia;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import heartin.plugin.mafia.Ability.*;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -9,20 +10,24 @@ import java.util.*;
 public final class GamePlayerManager {
 
     private final GameProcess process;
+    private final Map<GamePlayer, Enum> playerChat;
     private final Map<UUID, GamePlayer> playersByUniqueId;
     private final Map<Player, GamePlayer> playersByPlayer;
-    private final Map<GamePlayer, Ability> citizen;
-    private final Map<GamePlayer, Ability> mafia;
-    private final Map<GamePlayer, Ability> doctor;
-    private final Map<GamePlayer, Ability> police;
+    private final Map<GamePlayer, Ability> playerAbility;
     private final Set<GamePlayer> onlineCitizen;
     private final Set<GamePlayer> onlineMafia;
     private final Set<GamePlayer> onlineDoctor;
     private final Set<GamePlayer> onlinePolice;
+    private final Set<GamePlayer> onlineMedium;
+    private final Set<GamePlayer> onlineSoldier;
+    private final Set<GamePlayer> onlineSpy;
     private Set<GamePlayer> unmodifiableMafia;
     private Set<GamePlayer> unmodifiableDoctor;
     private Set<GamePlayer> unmodifiablePolice;
     private Set<GamePlayer> unmodifiableCitizen;
+    private Set<GamePlayer> unmodifiableSpy;
+    private Set<GamePlayer> unmodifiableSoldier;
+    private Set<GamePlayer> unmodifiableMedium;
     private Collection<GamePlayer> unmodifiablePlayers;
     private Collection<GamePlayer> unmodifiableOnlinePlayers;
 
@@ -34,21 +39,20 @@ public final class GamePlayerManager {
 
         Map playersByUniqueId = new HashMap(size);
         Map playersByPlayer = new IdentityHashMap(size);
+        Map playerAbility = new HashMap(size);
+        Map playerChat = new HashMap();
 
 
         for (Player player : players) {
             GameMode mode = player.getGameMode();
 
-            if ((mode == GameMode.CREATIVE) || (mode == GameMode.SPECTATOR)) {
+          /* if ((mode == GameMode.CREATIVE) || (mode == GameMode.SPECTATOR)) {
                 continue;
-            }
-
+            } */
             GamePlayer gamePlayer = new GamePlayer(this, player);
 
             playersByUniqueId.put(gamePlayer.getUniqueId(), gamePlayer);
             playersByPlayer.put(player, gamePlayer);
-
-
         }
 
         if (playersByUniqueId.size() < 4) {
@@ -56,14 +60,15 @@ public final class GamePlayerManager {
         }
         this.playersByUniqueId = playersByUniqueId;
         this.playersByPlayer = playersByPlayer;
-        this.citizen = new HashMap(size);
-        this.mafia = new HashMap(size);
-        this.doctor = new HashMap(size);
-        this.police = new HashMap(size);
+        this.playerChat = playerChat;
+        this.playerAbility = playerAbility;
         this.onlineCitizen = new HashSet(size);
         this.onlineMafia = new HashSet(size);
         this.onlineDoctor = new HashSet(size);
         this.onlinePolice = new HashSet(size);
+        this.onlineMedium = new HashSet(size);
+        this.onlineSoldier = new HashSet(size);
+        this.onlineSpy = new HashSet(size);
     }
 
     void registerGamePlayer(Player player) {
@@ -71,7 +76,6 @@ public final class GamePlayerManager {
 
         if (gamePlayer != null) {
             gamePlayer.setPlayer(player);
-
         }
     }
 
@@ -80,16 +84,36 @@ public final class GamePlayerManager {
 
         if (gamePlayer != null) {
             gamePlayer.removePlayer();
+            onlineSpy.remove(gamePlayer);
+            onlineSoldier.remove(gamePlayer);
+            onlineMedium.remove(gamePlayer);
+            onlineCitizen.remove(gamePlayer);
+            onlineDoctor.remove(gamePlayer);
+            onlineMafia.remove(gamePlayer);
+            onlinePolice.remove(gamePlayer);
         }
+    }
+
+    public GamePlayer setMafiaChat(Player player) {
+        GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(player);
+
+        if (!playerChat.values().contains(GameChat.ChatMode.MAFIA)) {
+            playerChat.put(gamePlayer, GameChat.ChatMode.MAFIA);
+        } else {
+            playerChat.remove(gamePlayer, GameChat.ChatMode.MAFIA);
+            playerChat.put(gamePlayer, GameChat.ChatMode.GENERAL);
+        }
+
+        return gamePlayer;
     }
 
     public GamePlayer setMafia(Player player) {
 
         GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
 
-        this.mafia.put(gamePlayer, new Mafia(gamePlayer));
+        this.playerAbility.put(gamePlayer, new Mafia(gamePlayer));
         this.onlineMafia.add(gamePlayer);
-        process.getScoreboard().setMafia(gamePlayer.getName());
+        //  process.getScoreboard().setMafia(gamePlayer.getName());
 
         return gamePlayer;
     }
@@ -108,14 +132,12 @@ public final class GamePlayerManager {
     public GamePlayer setCitizen(Player player) {
         GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
 
-        this.citizen.put(gamePlayer, new Citizen(gamePlayer));
+        this.playerAbility.put(gamePlayer, new Citizen(gamePlayer));
         this.onlineCitizen.add(gamePlayer);
-        process.getScoreboard().setCitizen(gamePlayer.getName());
-
+        //   process.getScoreboard().setCitizen(gamePlayer.getName());
 
         return gamePlayer;
     }
-
 
     public Set<GamePlayer> getOnlineCitizen() {
 
@@ -131,10 +153,9 @@ public final class GamePlayerManager {
     public GamePlayer setDoctor(Player player) {
         GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
 
-        this.doctor.put(gamePlayer, new Doctor(gamePlayer));
+        this.playerAbility.put(gamePlayer, new Doctor(gamePlayer));
         this.onlineDoctor.add(gamePlayer);
-        process.getScoreboard().setDoctor(gamePlayer.getName());
-
+        //  process.getScoreboard().setDoctor(gamePlayer.getName());
 
         return gamePlayer;
     }
@@ -152,9 +173,9 @@ public final class GamePlayerManager {
     public GamePlayer setPolice(Player player) {
         GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
 
-        this.police.put(gamePlayer, new Police(gamePlayer));
+        this.playerAbility.put(gamePlayer, new Police(gamePlayer));
         this.onlinePolice.add(gamePlayer);
-        process.getScoreboard().setPolice(gamePlayer.getName());
+        //  process.getScoreboard().setPolice(gamePlayer.getName());
 
         return gamePlayer;
     }
@@ -167,6 +188,66 @@ public final class GamePlayerManager {
             this.unmodifiablePolice = (police = Collections.unmodifiableSet(this.onlinePolice));
         }
         return police;
+    }
+
+    public GamePlayer setSpy(Player player) {
+        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+
+        this.playerAbility.put(gamePlayer, new Spy(gamePlayer));
+        this.onlineSpy.add(gamePlayer);
+        //  process.getScoreboard().setSpy(gamePlayer.getName());
+
+        return gamePlayer;
+    }
+
+    public Set<GamePlayer> getOnlineSpy() {
+
+        Set spy = this.unmodifiableSpy;
+
+        if (spy == null) {
+            this.unmodifiableSpy = (spy = Collections.unmodifiableSet(this.onlineSpy));
+        }
+        return spy;
+    }
+
+    public GamePlayer setSoldier(Player player) {
+        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+
+        this.playerAbility.put(gamePlayer, new Citizen(gamePlayer));
+        this.onlineSoldier.add(gamePlayer);
+        // process.getScoreboard().setSoldier(gamePlayer.getName());
+
+        return gamePlayer;
+    }
+
+    public Set<GamePlayer> getOnlineSoldier() {
+
+        Set soldier = this.unmodifiableSoldier;
+
+        if (soldier == null) {
+            this.unmodifiableSoldier = (soldier = Collections.unmodifiableSet(this.onlineSoldier));
+        }
+        return soldier;
+    }
+
+    public GamePlayer setMedium(Player player) {
+        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+
+        this.playerAbility.put(gamePlayer, new Citizen(gamePlayer));
+        this.onlineMedium.add(gamePlayer);
+        // process.getScoreboard().setMedium(gamePlayer.getName());
+
+        return gamePlayer;
+    }
+
+    public Set<GamePlayer> getOnlineMedium() {
+
+        Set medium = this.unmodifiableMedium;
+
+        if (medium == null) {
+            this.unmodifiableMedium = (medium = Collections.unmodifiableSet(this.onlineMedium));
+        }
+        return medium;
     }
 
     public GamePlayer getGamePlayer(Player player) {

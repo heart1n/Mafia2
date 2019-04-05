@@ -1,5 +1,5 @@
-wait-ticks: 200
-day-ticks: 3000
-night-ticks: 3000
+wait-ticks: 600
+day-ticks: 2400
+night-ticks: 2400
 mafia-number: 1
 citizen-number: 1

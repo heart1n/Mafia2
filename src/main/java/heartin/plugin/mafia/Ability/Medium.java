@@ -2,16 +2,17 @@ package heartin.plugin.mafia.Ability;
 
 import heartin.plugin.mafia.GamePlayer;
 
-public class Citizen extends Ability {
+public class Medium extends Ability{
 
     private static String[] description = {""};
 
-    public Citizen(GamePlayer gamePlayer) {
-        super(gamePlayer, "Citizen", Type.CITIZEN,  description);
+    public Medium(GamePlayer gamePlayer) {
+
+        super(gamePlayer, "Soldier", Type.CITIZEN, description);
     }
 
     public String[] getDescription(String[] description) {
+
         return description;
     }
-
 }
