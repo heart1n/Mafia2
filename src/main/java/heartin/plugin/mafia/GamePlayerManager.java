@@ -1,6 +1,5 @@
 package heartin.plugin.mafia;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import heartin.plugin.mafia.Ability.*;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -94,19 +93,6 @@ public final class GamePlayerManager {
         }
     }
 
-    public GamePlayer setMafiaChat(Player player) {
-        GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(player);
-
-        if (!playerChat.values().contains(GameChat.ChatMode.MAFIA)) {
-            playerChat.put(gamePlayer, GameChat.ChatMode.MAFIA);
-        } else {
-            playerChat.remove(gamePlayer, GameChat.ChatMode.MAFIA);
-            playerChat.put(gamePlayer, GameChat.ChatMode.GENERAL);
-        }
-
-        return gamePlayer;
-    }
-
     public GamePlayer setMafia(Player player) {
 
         GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
@@ -118,12 +104,21 @@ public final class GamePlayerManager {
         return gamePlayer;
     }
 
+    public GamePlayer getMafia(Player player)
+    {
+        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+
+
+        return gamePlayer;
+    }
+
     public Set<GamePlayer> getOnlineMafia() {
 
         Set mafia = this.unmodifiableMafia;
 
         if (mafia == null) {
             this.unmodifiableMafia = (mafia = Collections.unmodifiableSet(this.onlineMafia));
+            System.out.println("getOnlineMafia" + mafia.size());
         }
 
         return mafia;

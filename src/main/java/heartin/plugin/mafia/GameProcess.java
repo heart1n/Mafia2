@@ -11,6 +11,7 @@ public final class GameProcess {
     private final GameListener listener;
     private final GameScheduler scheduler;
     private final GameScoreboard scoreboard;
+    private final GameChat gamechat;
     private final BukkitTask bukkitTask;
 
     GameProcess(GamePlugin plugin) {
@@ -18,6 +19,7 @@ public final class GameProcess {
         this.scoreboard = new GameScoreboard(this);
         this.playerManager = new GamePlayerManager(this);
         this.listener = new GameListener(this);
+        this.gamechat = new GameChat(this);
         this.scheduler = new GameScheduler(this);
         this.bukkitTask = plugin.getServer().getScheduler().runTaskTimer(plugin, this.scheduler, 0L, 1L);
 
@@ -28,6 +30,10 @@ public final class GameProcess {
     public GamePlugin getPlugin()
     {
         return this.plugin;
+    }
+
+    public GameChat getChat() {
+        return this.gamechat;
     }
 
     public GamePlayerManager getPlayerManager()

@@ -1,8 +1,10 @@
 package heartin.plugin.mafia;
 
+import heartin.plugin.mafia.heartin.plugin.command.CommandGameChat;
 import heartin.plugin.mafia.heartin.plugin.command.CommandGameStart;
 import heartin.plugin.mafia.heartin.plugin.command.CommandGameStop;
 import nemo.mc.command.bukkit.CommandManager;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class GamePlugin extends JavaPlugin {
@@ -22,9 +24,8 @@ public class GamePlugin extends JavaPlugin {
     }
 
 
-    private void setupCommand()
-    {
-        new CommandManager().addHelp("help").addComponent("start", new CommandGameStart()).addComponent("stop", new CommandGameStop()).register(getCommand("game"));
+    private void setupCommand() {
+        new CommandManager().addHelp("help").addComponent("start", new CommandGameStart()).addComponent("stop", new CommandGameStop()).addComponent("chat", new CommandGameChat()).register(getCommand("game"));
     }
 
     public boolean processStart() {
@@ -49,4 +50,11 @@ public class GamePlugin extends JavaPlugin {
 
         return true;
     }
+
+    public GameProcess getProcess()
+    {
+        return process;
+    }
+
+
 }

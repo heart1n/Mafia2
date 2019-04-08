@@ -83,6 +83,9 @@ public final class GameScheduler implements Runnable {
 
                 Player player = gamePlayer.getPlayer();
 
+                process.getChat().setGeneralChat(player);
+                player.sendMessage("GeneralChatJoin" + process.getChat().playerChat.values().size());
+
                 player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 10), true);
                 Packet titlePacket = Packet.TITLE.compound("§6마피아 게임을 시작합니다", "§7직업을 확인해주세요.", 5, 60, 10);
                 titlePacket.send(player);

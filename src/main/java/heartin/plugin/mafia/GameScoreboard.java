@@ -1,6 +1,7 @@
 package heartin.plugin.mafia;
 
 
+import heartin.plugin.mafia.Ability.Citizen;
 import nemo.mc.packet.Packet;
 import nemo.mc.scoreboard.*;
 import org.bukkit.entity.Player;
@@ -44,6 +45,7 @@ final class GameScoreboard {
 
         team = scoreboard.registerTeam("Mafia");
         team.setPrefix("§c");
+
         this.mafia = team;
 
         team = scoreboard.registerTeam("Police");
@@ -145,16 +147,13 @@ final class GameScoreboard {
 
     void setMedium(String entry)
     {
-
     }
     void setSoldier(String entry)
     {
-
     }
 
     void setSpy(String entry)
     {
-
     }
 
     void setScore(int score)
