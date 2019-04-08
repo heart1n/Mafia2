@@ -250,12 +250,14 @@ public final class GamePlayerManager {
         return medium;
     }
 
+
     public GamePlayer getGamePlayer(Player player) {
 
         return (GamePlayer) this.playersByPlayer.get(player);
     }
 
     public GamePlayer getGamePlayer(UUID uniqueId) {
+
         return this.playersByUniqueId.get(uniqueId);
     }
 
