@@ -12,6 +12,7 @@ public class GamePlayer {
     private final UUID uniqueId;
     private final String name;
     private Player player;
+    private boolean  citizen;
 
     GamePlayer(GamePlayerManager manager, Player player) {
         this.manager = manager;
@@ -43,6 +44,16 @@ public class GamePlayer {
     public String getName() {
 
         return this.name;
+    }
+
+    public boolean isCitizen()
+    {
+        return this.citizen;
+    }
+
+    public boolean isMafia()
+    {
+        return !this.citizen;
     }
 
 

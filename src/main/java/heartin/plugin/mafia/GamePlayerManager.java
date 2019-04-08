@@ -1,7 +1,7 @@
 package heartin.plugin.mafia;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import heartin.plugin.mafia.Ability.*;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
@@ -10,7 +10,6 @@ import java.util.*;
 public final class GamePlayerManager {
 
     private final GameProcess process;
-    private final Map<GamePlayer, Enum> playerChat;
     private final Map<UUID, GamePlayer> playersByUniqueId;
     private final Map<Player, GamePlayer> playersByPlayer;
     private final Map<GamePlayer, Ability> playerAbility;
@@ -21,6 +20,7 @@ public final class GamePlayerManager {
     private final Set<GamePlayer> onlineMedium;
     private final Set<GamePlayer> onlineSoldier;
     private final Set<GamePlayer> onlineSpy;
+    private final Set<GamePlayer> onlineDeath;
     private Set<GamePlayer> unmodifiableMafia;
     private Set<GamePlayer> unmodifiableDoctor;
     private Set<GamePlayer> unmodifiablePolice;
@@ -28,6 +28,7 @@ public final class GamePlayerManager {
     private Set<GamePlayer> unmodifiableSpy;
     private Set<GamePlayer> unmodifiableSoldier;
     private Set<GamePlayer> unmodifiableMedium;
+    private Set<GamePlayer> unmodifiableDeath;
     private Collection<GamePlayer> unmodifiablePlayers;
     private Collection<GamePlayer> unmodifiableOnlinePlayers;
 
@@ -40,7 +41,6 @@ public final class GamePlayerManager {
         Map playersByUniqueId = new HashMap(size);
         Map playersByPlayer = new IdentityHashMap(size);
         Map playerAbility = new HashMap(size);
-        Map playerChat = new HashMap();
 
 
         for (Player player : players) {
@@ -60,15 +60,16 @@ public final class GamePlayerManager {
         }
         this.playersByUniqueId = playersByUniqueId;
         this.playersByPlayer = playersByPlayer;
-        this.playerChat = playerChat;
         this.playerAbility = playerAbility;
         this.onlineCitizen = new HashSet(size);
+        this.onlineCitizen.addAll(playersByPlayer.values());
         this.onlineMafia = new HashSet(size);
         this.onlineDoctor = new HashSet(size);
         this.onlinePolice = new HashSet(size);
         this.onlineMedium = new HashSet(size);
         this.onlineSoldier = new HashSet(size);
         this.onlineSpy = new HashSet(size);
+        this.onlineDeath = new HashSet(size);
     }
 
     void registerGamePlayer(Player player) {
@@ -76,6 +77,7 @@ public final class GamePlayerManager {
 
         if (gamePlayer != null) {
             gamePlayer.setPlayer(player);
+
         }
     }
 
@@ -91,31 +93,57 @@ public final class GamePlayerManager {
             onlineDoctor.remove(gamePlayer);
             onlineMafia.remove(gamePlayer);
             onlinePolice.remove(gamePlayer);
+            onlineDeath.remove(gamePlayer);
         }
     }
 
-    public GamePlayer setMafiaChat(Player player) {
-        GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(player);
+    void checkFinish() {
 
-        if (!playerChat.values().contains(GameChat.ChatMode.MAFIA)) {
-            playerChat.put(gamePlayer, GameChat.ChatMode.MAFIA);
-        } else {
-            playerChat.remove(gamePlayer, GameChat.ChatMode.MAFIA);
-            playerChat.put(gamePlayer, GameChat.ChatMode.GENERAL);
+        if (this.getOnlineMafia().size()  > 0)
+            return;
+
+            process.getPlugin().getServer().broadcastMessage("시민 승리");
+            process.getPlugin().processStop();
+
+    }
+
+    public GamePlayer setDeath(Player player) {
+        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+
+        this.onlineDeath.add(gamePlayer);
+        GameChat.playerChat.put(gamePlayer, GameChat.ChatMode.DEATH);
+
+        Set mafia = this.unmodifiableMafia;
+
+        if (mafia != null)
+        {
+            onlineMafia.remove(gamePlayer);
         }
+
+        gamePlayer.getPlayer().sendMessage("앙 죽어띠 - " + onlineDeath.size());
 
         return gamePlayer;
     }
 
-    public GamePlayer setMafia(Player player) {
+    public GamePlayer setMafia(GamePlayer gamePlayer) {
 
-        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+        this.onlineCitizen.remove(gamePlayer);
+        this.onlineMafia.add(gamePlayer);
 
         this.playerAbility.put(gamePlayer, new Mafia(gamePlayer));
-        this.onlineMafia.add(gamePlayer);
+
+
         //  process.getScoreboard().setMafia(gamePlayer.getName());
 
         return gamePlayer;
+    }
+
+    public Ability getMafia(Player player) {
+
+        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+
+        return this.playerAbility.get(gamePlayer);
+        // -> 플레이어 직업 호출
     }
 
     public Set<GamePlayer> getOnlineMafia() {
@@ -281,5 +309,17 @@ public final class GamePlayerManager {
             this.onlinePlayers = onlinePlayers = Collections.unmodifiableCollection(playersByPlayer.values());
 
         return onlinePlayers;
+    }
+
+
+    public Set<GamePlayer> getDeathPlayers() {
+
+        Set deathPlayers = this.unmodifiableDeath;
+
+        if (deathPlayers == null) {
+            this.unmodifiableMafia = (deathPlayers = Collections.unmodifiableSet(this.onlineDeath));
+        }
+
+        return deathPlayers;
     }
 }

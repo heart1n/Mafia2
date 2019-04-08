@@ -18,8 +18,14 @@ public class Ability {
         this.type = type;
     }
 
-    public void description()
+    public String[] description()
     {
+        return  description;
+    }
+
+    public Enum abilityType()
+    {
+        return this.type;
     }
 
     public static enum Type

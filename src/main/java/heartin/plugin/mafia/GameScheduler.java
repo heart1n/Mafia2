@@ -45,15 +45,20 @@ public final class GameScheduler implements Runnable {
             List<GamePlayer> citizens = new ArrayList(process.getPlayerManager().getOnlinePlayers());
             Random random = new Random();
 
-            if (citizens.size() > 1)
-            {
+            if (citizens.size() > 1) {
+
                 GamePlayer mafia = (GamePlayer) citizens.remove(random.nextInt(citizens.size()));
                 GamePlayer doctor = (GamePlayer) citizens.remove(random.nextInt(citizens.size()));
                 GamePlayer police = (GamePlayer) citizens.remove(random.nextInt(citizens.size()));
 
                 if (mafia.isOnline()) {
+
                     Player player = mafia.getPlayer();
-                    process.getPlayerManager().setMafia(player);
+                    GamePlayer gamePlayer = (GamePlayer) process.getPlayerManager().getGamePlayer(player);
+
+                    process.getPlayerManager().setMafia(gamePlayer);
+
+                    player.sendMessage("" + process.getPlayerManager().getMafia(gamePlayer.getPlayer()).abilityType());
                 }
 
                 if (doctor.isOnline()) {
@@ -73,15 +78,16 @@ public final class GameScheduler implements Runnable {
 
                     process.getPlayerManager().setCitizen(player);
                 }
-            }
-            else
-            {
+            } else {
                 System.out.println("==============================");
             }
 
             for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
 
                 Player player = gamePlayer.getPlayer();
+
+                process.getChat().setGeneralChat(player);
+                player.sendMessage("GeneralChatJoin" + process.getChat().playerChat.values().size());
 
                 player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 10), true);
                 Packet titlePacket = Packet.TITLE.compound("§6마피아 게임을 시작합니다", "§7직업을 확인해주세요.", 5, 60, 10);
@@ -91,21 +97,22 @@ public final class GameScheduler implements Runnable {
 
 
                 player.sendMessage("잠시 후 게임이 시작됩니다.");
-                player.sendMessage("테스트 메시지 123 조금만 기다려주세요");
+                player.sendMessage("=======================================================");
+                player.sendMessage("§bonline Citizen " + process.getPlayerManager().getOnlineCitizen().size());
             }
 
             return new WaitTask();
         }
     }
 
-    private class WaitTask implements  GameTask {
+    private class WaitTask implements GameTask {
 
         private int remainTicks = GameConfig.waitTicks;
 
-        WaitTask()
-        {
+        WaitTask() {
             updateTime();
         }
+
         @Override
         public GameTask run() {
 
@@ -129,8 +136,7 @@ public final class GameScheduler implements Runnable {
 
             Bukkit.broadcastMessage("test task0");
 
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers())
-            {
+            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
                 Player player = gamePlayer.getPlayer();
 
                 Packet titlePacket = Packet.TITLE.compound("§6아침이 되었습니다.", "§7대화를 진행하세요.", 5, 60, 10);
@@ -139,6 +145,7 @@ public final class GameScheduler implements Runnable {
 
             return new DayTask();
         }
+
         private void updateTime() {
             int remainTicks = this.remainTicks;
 
@@ -169,6 +176,7 @@ public final class GameScheduler implements Runnable {
             }
         }
     }
+
     private class DayTask implements GameTask {
 
         private int remainTicks = GameConfig.dayTicks;
@@ -200,26 +208,25 @@ public final class GameScheduler implements Runnable {
             }
             // Task run
 
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers())
-            {
+            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
                 Player player = gamePlayer.getPlayer();
 
             }
             Bukkit.broadcastMessage("test task1");
 
 
-          // GameProcess process = GameScheduler.this.process;
-       //     process.getPlugin().processStop();
+            // GameProcess process = GameScheduler.this.process;
+            //     process.getPlugin().processStop();
 
             return new WaitTask();
         }
 
         private void updateTime() {
-                        int remainTicks = this.remainTicks;
+            int remainTicks = this.remainTicks;
 
-                        if (remainTicks > 100) {
-                            if (remainTicks % 2 == 0) {
-                                int seconds = remainTicks / 20;
+            if (remainTicks > 100) {
+                if (remainTicks % 2 == 0) {
+                    int seconds = remainTicks / 20;
 
                     for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
                         Player player = gamePlayer.getPlayer();

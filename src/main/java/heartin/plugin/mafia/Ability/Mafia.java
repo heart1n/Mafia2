@@ -4,16 +4,24 @@ import heartin.plugin.mafia.GamePlayer;
 
 public class Mafia extends Ability {
 
-    private static String[] description = {""};
+    private static String[] description = {"당신은 마피아 입니다"};
+
+
 
     public Mafia(GamePlayer gamePlayer) {
 
         super(gamePlayer, "Mafia", Type.MAFIA, description);
     }
 
-    public String[] getDescription(String[] description)
+    public String[] description()
     {
         return description;
+    }
+
+
+    public  Enum type()
+    {
+        return abilityType();
     }
 
 }
