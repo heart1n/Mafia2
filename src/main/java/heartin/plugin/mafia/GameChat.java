@@ -11,13 +11,11 @@ public class GameChat {
 
     public static Map<GamePlayer, ChatMode> playerChat = new HashMap();
 
-    public GameChat(GameProcess process)
-    {
+    public GameChat(GameProcess process) {
         this.process = process;
     }
 
-    public GamePlayer setMafiaChat(Player player)
-    {
+    public GamePlayer setMafiaChat(Player player) {
         GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(player);
 
         ChatMode mode = this.playerChat.get(gamePlayer);
@@ -31,8 +29,7 @@ public class GameChat {
         return gamePlayer;
     }
 
-    public GamePlayer setGeneralChat(Player player)
-    {
+    public GamePlayer setGeneralChat(Player player) {
         GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(player);
 
         playerChat.put(gamePlayer, ChatMode.GENERAL);
@@ -40,8 +37,7 @@ public class GameChat {
         return gamePlayer;
     }
 
-    public static enum ChatMode
-    {
+    public static enum ChatMode {
         GENERAL,
         MAFIA,
         DEATH;

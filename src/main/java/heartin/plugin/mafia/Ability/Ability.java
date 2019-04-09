@@ -10,7 +10,7 @@ public class Ability {
     private final String[] description;
     private Type type;
 
-    public Ability(GamePlayer gamePlayer, String abilityName, Type type,  String[] decription) {
+    public Ability(GamePlayer gamePlayer, String abilityName, Type type, String[] decription) {
 
         this.gamePlayer = gamePlayer;
         this.abilityName = abilityName;
@@ -18,18 +18,15 @@ public class Ability {
         this.type = type;
     }
 
-    public String[] description()
-    {
-        return  description;
+    public String[] description() {
+        return description;
     }
 
-    public Enum abilityType()
-    {
+    public Enum abilityType() {
         return this.type;
     }
 
-    public static enum Type
-    {
+    public static enum Type {
         MAFIA,
         CITIZEN;
     }

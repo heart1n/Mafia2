@@ -34,13 +34,9 @@ public class GameListener implements Listener {
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event)
     {
-
         GameProcess process = this.process;
-
         Player player = event.getEntity();
-
         Player killer = player.getKiller();
-
        Ability mafia = process.getPlayerManager().getMafia(player);
 
 
@@ -49,7 +45,7 @@ public class GameListener implements Listener {
         player.sendMessage("당신은 죽었습니다.");
 
         process.getPlayerManager().checkFinish();
-
+        process.getPlayerManager().checkCitizen();
     }
 
     @EventHandler

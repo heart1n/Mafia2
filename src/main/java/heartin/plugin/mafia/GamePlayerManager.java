@@ -1,7 +1,7 @@
 package heartin.plugin.mafia;
 
 import heartin.plugin.mafia.Ability.*;
-import org.bukkit.Bukkit;
+import heartin.plugin.mafia.heartin.plugin.command.CommandGameVote;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
@@ -32,6 +32,9 @@ public final class GamePlayerManager {
     private Collection<GamePlayer> unmodifiablePlayers;
     private Collection<GamePlayer> unmodifiableOnlinePlayers;
 
+
+    private final Map<GamePlayer, Boolean> voteCheckPlayer;
+
     GamePlayerManager(GameProcess process) {
         this.process = process;
 
@@ -41,6 +44,7 @@ public final class GamePlayerManager {
         Map playersByUniqueId = new HashMap(size);
         Map playersByPlayer = new IdentityHashMap(size);
         Map playerAbility = new HashMap(size);
+        Map voteCheckPlayer = new HashMap(size);
 
 
         for (Player player : players) {
@@ -70,6 +74,7 @@ public final class GamePlayerManager {
         this.onlineSoldier = new HashSet(size);
         this.onlineSpy = new HashSet(size);
         this.onlineDeath = new HashSet(size);
+        this.voteCheckPlayer = voteCheckPlayer;
     }
 
     void registerGamePlayer(Player player) {
@@ -99,12 +104,49 @@ public final class GamePlayerManager {
 
     void checkFinish() {
 
-        if (this.getOnlineMafia().size()  > 0)
+        if (this.getOnlineMafia().size() > 0)
             return;
 
-            process.getPlugin().getServer().broadcastMessage("시민 승리");
-            process.getPlugin().processStop();
+        process.getPlugin().getServer().broadcastMessage("시민 승리");
+        process.getPlugin().processStop();
+        process.getScheduler().remainbar.removeAll();
+    }
 
+    void checkCitizen() {
+        if (this.getOnlineCitizen().size() > 0)
+            return;
+
+        process.getPlugin().getServer().broadcastMessage("마피아 승리");
+        process.getPlugin().processStop();
+        process.getScheduler().remainbar.removeAll();
+    }
+
+
+    public GamePlayer setVote(GamePlayer gamePlayer) {
+        this.voteCheckPlayer.put(gamePlayer, true);
+
+        CommandGameVote.vote.put(gamePlayer.getName(), Integer.valueOf(0));
+
+        return gamePlayer;
+    }
+
+    public GamePlayer removeVote(GamePlayer gamePlayer) {
+        this.voteCheckPlayer.remove(gamePlayer);
+        this.voteCheckPlayer.put(gamePlayer, false);
+
+        return gamePlayer;
+    }
+
+    public Boolean getVote(GamePlayer gamePlayer) {
+        Boolean bool = this.voteCheckPlayer.get(gamePlayer);
+
+        return bool;
+    }
+
+    public GamePlayer cleartVote(GamePlayer gamePlayer) {
+        this.voteCheckPlayer.clear();
+
+        return gamePlayer;
     }
 
     public GamePlayer setDeath(Player player) {
@@ -114,16 +156,27 @@ public final class GamePlayerManager {
         GameChat.playerChat.put(gamePlayer, GameChat.ChatMode.DEATH);
 
         Set mafia = this.unmodifiableMafia;
+        Set citizen = this.unmodifiableCitizen;
+        Set police = this.unmodifiablePolice;
+        Set doctor = this.unmodifiableDoctor;
 
         if (mafia != null)
-        {
             onlineMafia.remove(gamePlayer);
-        }
+        if (citizen != null)
+            onlineCitizen.remove(gamePlayer);
+        if (police != null)
+            onlinePolice.remove(gamePlayer);
+        if (doctor != null)
+            onlineDoctor.remove(gamePlayer);
 
         gamePlayer.getPlayer().sendMessage("앙 죽어띠 - " + onlineDeath.size());
+        gamePlayer.setDead();
+
+        gamePlayer.getPlayer().sendMessage("Dead : " + gamePlayer.isDead());
 
         return gamePlayer;
     }
+
 
     public GamePlayer setMafia(GamePlayer gamePlayer) {
 
@@ -131,7 +184,6 @@ public final class GamePlayerManager {
         this.onlineMafia.add(gamePlayer);
 
         this.playerAbility.put(gamePlayer, new Mafia(gamePlayer));
-
 
         //  process.getScoreboard().setMafia(gamePlayer.getName());
 
@@ -311,13 +363,12 @@ public final class GamePlayerManager {
         return onlinePlayers;
     }
 
-
     public Set<GamePlayer> getDeathPlayers() {
 
         Set deathPlayers = this.unmodifiableDeath;
 
         if (deathPlayers == null) {
-            this.unmodifiableMafia = (deathPlayers = Collections.unmodifiableSet(this.onlineDeath));
+            this.unmodifiableDeath = (deathPlayers = Collections.unmodifiableSet(this.onlineDeath));
         }
 
         return deathPlayers;

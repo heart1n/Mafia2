@@ -12,7 +12,7 @@ public class GamePlayer {
     private final UUID uniqueId;
     private final String name;
     private Player player;
-    private boolean  citizen;
+    private boolean dead;
 
     GamePlayer(GamePlayerManager manager, Player player) {
         this.manager = manager;
@@ -46,18 +46,16 @@ public class GamePlayer {
         return this.name;
     }
 
-    public boolean isCitizen()
-    {
-        return this.citizen;
+    public boolean isDead() {
+        return dead;
     }
 
-    public boolean isMafia()
+    void setDead()
     {
-        return !this.citizen;
+        this.dead = true;
     }
-
-
     public boolean isOnline() {
+
         return this.player != null;
     }
 }
