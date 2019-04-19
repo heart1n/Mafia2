@@ -1,5 +1,7 @@
 package heartin.plugin.mafia;
 
+import heartin.plugin.mafia.Ability.Ability;
+import heartin.plugin.mafia.Ability.Citizen;
 import heartin.plugin.mafia.heartin.plugin.command.CommandGameVote;
 import nemo.mc.packet.Packet;
 import org.bukkit.Bukkit;
@@ -46,7 +48,6 @@ public final class GameScheduler implements Runnable {
 
             List<GamePlayer> citizens = new ArrayList(process.getPlayerManager().getOnlinePlayers());
             Random random = new Random();
-
             if (citizens.size() > 1) {
 
                 GamePlayer mafia = (GamePlayer) citizens.remove(random.nextInt(citizens.size()));
@@ -56,7 +57,7 @@ public final class GameScheduler implements Runnable {
                 if (mafia.isOnline()) {
 
                     Player player = mafia.getPlayer();
-                    GamePlayer gamePlayer = (GamePlayer) process.getPlayerManager().getGamePlayer(player);
+                    GamePlayer gamePlayer = (GamePlayer)process.getPlayerManager().getGamePlayer(player);
 
                     process.getPlayerManager().setMafia(gamePlayer);
 
@@ -217,7 +218,7 @@ public final class GameScheduler implements Runnable {
 
                 Player player = gamePlayer.getPlayer();
 
-                process.getPlayerManager().setVote(gamePlayer);
+                process.getVote().setVote(gamePlayer);
                 player.sendMessage("투표권 지급");
 
                 Packet titlePacket = Packet.TITLE.compound("§6투표시간이 되었습니다", "§7투표를 진행해주세요.", 5, 60, 10);
@@ -294,7 +295,7 @@ public final class GameScheduler implements Runnable {
             for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
                 Player player = gamePlayer.getPlayer();
 
-                process.getPlayerManager().cleartVote(gamePlayer);
+                process.getVote().cleartVote(gamePlayer);
 
                 Packet titlePacket = Packet.TITLE.compound("§6투표시간이 종료되었습니다", "§7아무말아무말", 5, 60, 10);
                 titlePacket.send(player);

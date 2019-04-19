@@ -1,43 +1,45 @@
 package heartin.plugin.mafia;
 
 import heartin.plugin.mafia.Ability.Ability;
+import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
 public class GameListener implements Listener {
 
     private final GameProcess process;
 
-    GameListener(GameProcess process)
-    {
+    GameListener(GameProcess process) {
         this.process = process;
     }
 
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event)
-    {
+    public void onPlayerJoin(PlayerJoinEvent event) {
         process.getPlayerManager().registerGamePlayer(event.getPlayer());
     }
 
     @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event)
-    {
+    public void onPlayerQuit(PlayerQuitEvent event) {
         process.getPlayerManager().unregisterGamePlayer(event.getPlayer());
     }
 
     @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent event)
-    {
+    public void onPlayerDeath(PlayerDeathEvent event) {
         GameProcess process = this.process;
         Player player = event.getEntity();
         Player killer = player.getKiller();
-       Ability mafia = process.getPlayerManager().getMafia(player);
+        Ability mafia = process.getPlayerManager().getMafia(player);
 
 
         process.getPlayerManager().setDeath(player);
@@ -46,6 +48,23 @@ public class GameListener implements Listener {
 
         process.getPlayerManager().checkFinish();
         process.getPlayerManager().checkCitizen();
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        ItemStack itemStack = event.getCurrentItem();
+
+        Player player = (Player)event.getWhoClicked();
+
+        if(itemStack.getItemMeta().getDisplayName().equals(" "))
+        {
+            event.setCancelled(true);
+        }
+        if(itemStack.getItemMeta().getDisplayName().equals("§6투표하기"));
+        {
+            process.getInventory().openVoteInventory(player);
+        }
+
     }
 
     @EventHandler
@@ -58,23 +77,16 @@ public class GameListener implements Listener {
         GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(event.getPlayer());
         GameChat.ChatMode mode = GameChat.playerChat.get(gamePlayer);
 
-
-        if (mode == GameChat.ChatMode.GENERAL)
-        {
+        if (mode == GameChat.ChatMode.GENERAL) {
             for (GamePlayer onlinePlayer : process.getPlayerManager().getOnlinePlayers())
                 onlinePlayer.getPlayer().sendMessage(gamePlayer.getName() + " §7: §e" + event.getMessage());
-        } else if (mode == GameChat.ChatMode.MAFIA)
-        {
-
+        } else if (mode == GameChat.ChatMode.MAFIA) {
             for (GamePlayer onlinePlayer : process.getPlayerManager().getOnlineMafia())
                 onlinePlayer.getPlayer().sendMessage(gamePlayer.getName() + " §7: §c" + event.getMessage());
-        } else if (mode == GameChat.ChatMode.DEATH)
-        {
+        } else if (mode == GameChat.ChatMode.DEATH) {
             for (GamePlayer onlinePlayer : process.getPlayerManager().getDeathPlayers())
-            {
-                onlinePlayer.getPlayer().sendMessage(gamePlayer.getName() + " §7: §7" + event.getMessage());
 
-            }
+                onlinePlayer.getPlayer().sendMessage(gamePlayer.getName() + " §7: §7" + event.getMessage());
         }
     }
 }

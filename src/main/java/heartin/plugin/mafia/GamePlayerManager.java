@@ -33,7 +33,7 @@ public final class GamePlayerManager {
     private Collection<GamePlayer> unmodifiableOnlinePlayers;
 
 
-    private final Map<GamePlayer, Boolean> voteCheckPlayer;
+
 
     GamePlayerManager(GameProcess process) {
         this.process = process;
@@ -44,8 +44,6 @@ public final class GamePlayerManager {
         Map playersByUniqueId = new HashMap(size);
         Map playersByPlayer = new IdentityHashMap(size);
         Map playerAbility = new HashMap(size);
-        Map voteCheckPlayer = new HashMap(size);
-
 
         for (Player player : players) {
             GameMode mode = player.getGameMode();
@@ -74,7 +72,7 @@ public final class GamePlayerManager {
         this.onlineSoldier = new HashSet(size);
         this.onlineSpy = new HashSet(size);
         this.onlineDeath = new HashSet(size);
-        this.voteCheckPlayer = voteCheckPlayer;
+
     }
 
     void registerGamePlayer(Player player) {
@@ -119,34 +117,6 @@ public final class GamePlayerManager {
         process.getPlugin().getServer().broadcastMessage("마피아 승리");
         process.getPlugin().processStop();
         process.getScheduler().remainbar.removeAll();
-    }
-
-
-    public GamePlayer setVote(GamePlayer gamePlayer) {
-        this.voteCheckPlayer.put(gamePlayer, true);
-
-        CommandGameVote.vote.put(gamePlayer.getName(), Integer.valueOf(0));
-
-        return gamePlayer;
-    }
-
-    public GamePlayer removeVote(GamePlayer gamePlayer) {
-        this.voteCheckPlayer.remove(gamePlayer);
-        this.voteCheckPlayer.put(gamePlayer, false);
-
-        return gamePlayer;
-    }
-
-    public Boolean getVote(GamePlayer gamePlayer) {
-        Boolean bool = this.voteCheckPlayer.get(gamePlayer);
-
-        return bool;
-    }
-
-    public GamePlayer cleartVote(GamePlayer gamePlayer) {
-        this.voteCheckPlayer.clear();
-
-        return gamePlayer;
     }
 
     public GamePlayer setDeath(Player player) {

@@ -34,13 +34,13 @@ public class CommandGameVote extends CommandComponent {
         name = args.next();
 
         try {
-            if (process.getPlayerManager().getVote(gamePlayer)) {
+            if (process.getVote().getVote(gamePlayer)) {
 
                 if (process.getPlayerManager().getGamePlayer(player).isDead()) {
                     sender.sendMessage("죽은 플레이어 입니다.");
                 } else {
                     vote.put(name, Integer.valueOf((Integer) vote.get(name)).intValue() + 1);
-                    process.getPlayerManager().removeVote(gamePlayer);
+                    process.getVote().removeVote(gamePlayer);
                     sender.sendMessage(name + "에게 투표를 합니다.");
                 }
 

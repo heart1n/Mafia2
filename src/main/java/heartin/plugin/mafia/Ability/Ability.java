@@ -1,6 +1,7 @@
 package heartin.plugin.mafia.Ability;
 
 import heartin.plugin.mafia.GamePlayer;
+import heartin.plugin.mafia.GameProcess;
 
 public class Ability {
 
@@ -9,6 +10,7 @@ public class Ability {
     private final String abilityName;
     private final String[] description;
     private Type type;
+
 
     public Ability(GamePlayer gamePlayer, String abilityName, Type type, String[] decription) {
 
@@ -24,6 +26,10 @@ public class Ability {
 
     public Enum abilityType() {
         return this.type;
+    }
+
+    public String getAbilityName() {
+        return abilityName;
     }
 
     public static enum Type {

@@ -1,9 +1,6 @@
 package heartin.plugin.mafia;
 
-import heartin.plugin.mafia.heartin.plugin.command.CommandGameChat;
-import heartin.plugin.mafia.heartin.plugin.command.CommandGameStart;
-import heartin.plugin.mafia.heartin.plugin.command.CommandGameStop;
-import heartin.plugin.mafia.heartin.plugin.command.CommandGameVote;
+import heartin.plugin.mafia.heartin.plugin.command.*;
 import nemo.mc.command.bukkit.CommandManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,7 +22,7 @@ public class GamePlugin extends JavaPlugin {
 
 
     private void setupCommand() {
-        new CommandManager().addHelp("help").addComponent("start", new CommandGameStart()).addComponent("stop", new CommandGameStop()).addComponent("chat", new CommandGameChat()).addComponent("vote", new CommandGameVote()).register(getCommand("game"));
+        new CommandManager().addHelp("help").addComponent("start", new CommandGameStart()).addComponent("stop", new CommandGameStop()).addComponent("chat", new CommandGameChat()).addComponent("vote", new CommandGameVote()).addComponent("invenotry", new CommandGameInventory()).register(getCommand("game"));
     }
 
     public boolean processStart() {

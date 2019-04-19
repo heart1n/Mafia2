@@ -32,7 +32,8 @@ public class GamePlayer {
         this.player = null;
     }
 
-    public Player getPlayer() {
+    public Player getPlayer()
+    {
         return this.player;
     }
 
