@@ -1,5 +1,6 @@
 package heartin.plugin.mafia;
 
+import heartin.plugin.mafia.Ability.Ability;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -24,7 +25,7 @@ public class GameChat {
 
         playerChat.put(gamePlayer, mode);
 
-        gamePlayer.getPlayer().sendMessage("채팅모드" + mode);
+        gamePlayer.getPlayer().sendMessage("§e채팅모드 §c: §r§l" + mode);
 
         return gamePlayer;
     }

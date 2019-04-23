@@ -33,8 +33,6 @@ public final class GamePlayerManager {
     private Collection<GamePlayer> unmodifiableOnlinePlayers;
 
 
-
-
     GamePlayerManager(GameProcess process) {
         this.process = process;
 
@@ -80,7 +78,6 @@ public final class GamePlayerManager {
 
         if (gamePlayer != null) {
             gamePlayer.setPlayer(player);
-
         }
     }
 
@@ -160,9 +157,7 @@ public final class GamePlayerManager {
         return gamePlayer;
     }
 
-    public Ability getMafia(Player player) {
-
-        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+    public Ability getMafia(GamePlayer gamePlayer) {
 
         return this.playerAbility.get(gamePlayer);
         // -> 플레이어 직업 호출
@@ -179,8 +174,7 @@ public final class GamePlayerManager {
         return mafia;
     }
 
-    public GamePlayer setCitizen(Player player) {
-        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+    public GamePlayer setCitizen(GamePlayer gamePlayer) {
 
         this.playerAbility.put(gamePlayer, new Citizen(gamePlayer));
         this.onlineCitizen.add(gamePlayer);
@@ -200,8 +194,7 @@ public final class GamePlayerManager {
     }
 
 
-    public GamePlayer setDoctor(Player player) {
-        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+    public GamePlayer setDoctor(GamePlayer gamePlayer) {
 
         this.playerAbility.put(gamePlayer, new Doctor(gamePlayer));
         this.onlineDoctor.add(gamePlayer);
@@ -220,8 +213,13 @@ public final class GamePlayerManager {
         return doctor;
     }
 
-    public GamePlayer setPolice(Player player) {
-        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+    public Ability getDoctor(GamePlayer gamePlayer) {
+
+        return this.playerAbility.get(gamePlayer);
+        // -> 플레이어 직업 호출
+    }
+
+    public GamePlayer setPolice(GamePlayer gamePlayer) {
 
         this.playerAbility.put(gamePlayer, new Police(gamePlayer));
         this.onlinePolice.add(gamePlayer);
@@ -240,8 +238,7 @@ public final class GamePlayerManager {
         return police;
     }
 
-    public GamePlayer setSpy(Player player) {
-        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+    public GamePlayer setSpy(GamePlayer gamePlayer) {
 
         this.playerAbility.put(gamePlayer, new Spy(gamePlayer));
         this.onlineSpy.add(gamePlayer);
@@ -260,8 +257,7 @@ public final class GamePlayerManager {
         return spy;
     }
 
-    public GamePlayer setSoldier(Player player) {
-        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+    public GamePlayer setSoldier(GamePlayer gamePlayer) {
 
         this.playerAbility.put(gamePlayer, new Citizen(gamePlayer));
         this.onlineSoldier.add(gamePlayer);
@@ -280,8 +276,7 @@ public final class GamePlayerManager {
         return soldier;
     }
 
-    public GamePlayer setMedium(Player player) {
-        GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
+    public GamePlayer setMedium(GamePlayer gamePlayer) {
 
         this.playerAbility.put(gamePlayer, new Citizen(gamePlayer));
         this.onlineMedium.add(gamePlayer);
@@ -299,7 +294,6 @@ public final class GamePlayerManager {
         }
         return medium;
     }
-
 
     public GamePlayer getGamePlayer(Player player) {
 

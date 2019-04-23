@@ -32,8 +32,7 @@ public class GamePlayer {
         this.player = null;
     }
 
-    public Player getPlayer()
-    {
+    public Player getPlayer() {
         return this.player;
     }
 
@@ -48,13 +47,13 @@ public class GamePlayer {
     }
 
     public boolean isDead() {
-        return dead;
+        return this.dead;
     }
 
-    void setDead()
-    {
+    void setDead() {
         this.dead = true;
     }
+
     public boolean isOnline() {
 
         return this.player != null;

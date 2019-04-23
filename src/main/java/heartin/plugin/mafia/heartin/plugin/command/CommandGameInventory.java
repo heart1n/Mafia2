@@ -28,7 +28,7 @@ public class CommandGameInventory extends CommandComponent {
 
         GameProcess process = GamePlugin.getInstance().getProcess();
 
-        process.getInventory().openInventory(player);
+        process.getInventory().show(process.getPlayerManager().getGamePlayer(player));
 
         return true;
     }

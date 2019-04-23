@@ -1,6 +1,7 @@
 package heartin.plugin.mafia;
 
 
+import heartin.plugin.mafia.Ability.Ability;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -10,21 +11,38 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.Collection;
-import java.util.Collections;
-
 public class GameInventory {
 
 
     private Inventory inventory;
-    private Inventory voteInventory;
+
     private final GameProcess process;
 
     GameInventory(GameProcess process) {
 
         this.process = process;
+    }
+
+    public Inventory mainInventory(Inventory inventory, Player player) {
         inventory = Bukkit.createInventory(null, 27, "Inventory Name");
+
         inventory.setItem(11, createItem("§6투표하기", Material.APPLE));
+        inventory.setItem(13, createItem("§d채팅모드", Material.CAKE));
+
+
+        GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(player);
+
+        Ability mafia = process.getPlayerManager().getMafia(gamePlayer);
+        Ability Doctor = process.getPlayerManager().getDoctor(gamePlayer);
+
+
+        if (mafia.abilityType() == Ability.Type.MAFIA) {
+            inventory.setItem(15, createItem("§b직업능력", Material.DIAMOND_SWORD));
+        }
+        else if (mafia.abilityType() == Ability.Type.DOCTOR)
+        {
+            inventory.setItem(15, createItem("§e직업능력", Material.BED));
+        }
 
         for (int i = 0; i < 9; i++) {
             inventory.setItem(i, createItem(" ", Material.STAINED_GLASS_PANE));
@@ -34,35 +52,66 @@ public class GameInventory {
         inventory.setItem(9, createItem(" ", Material.STAINED_GLASS_PANE));
         inventory.setItem(17, createItem(" ", Material.STAINED_GLASS_PANE));
 
+        return inventory;
     }
 
     public Inventory voteInventory(Inventory voteInventory, Player player) {
         voteInventory = Bukkit.createInventory(null, 9, "Vote Inventory");
 
-        GamePlayer gamePlayer = (GamePlayer)process.getPlayerManager().getGamePlayer(player);
+        ItemStack skull = new ItemStack(Material.SKULL_ITEM);
+        skull.setDurability((short) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
 
-            for (Player players : Bukkit.getOnlinePlayers())
-            {
-                ItemStack skull = new ItemStack(Material.SKULL_ITEM);
-                skull.setDurability((short) SkullType.PLAYER.ordinal());
-                SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-                skullMeta.setOwningPlayer(players.getPlayer());
-                skullMeta.setDisplayName(players.getName());
-                skull.setItemMeta(skullMeta);
+        for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
 
-                voteInventory.addItem(skull);
-            }
+            skullMeta.setOwningPlayer(gamePlayer.getPlayer());
+            skullMeta.setDisplayName(gamePlayer.getName());
+            skull.setItemMeta(skullMeta);
 
-      /*  for (int i = 0; i < 9; i++) {
-            voteInventory.setItem(i, createItem(" ", Material.STAINED_GLASS_PANE));
-            voteInventory.setItem(i + 18, createItem(" ", Material.STAINED_GLASS_PANE));
+            voteInventory.addItem(skull);
         }
 
-        voteInventory.setItem(9, createItem(" ", Material.STAINED_GLASS_PANE));
-        voteInventory.setItem(17, createItem(" ", Material.STAINED_GLASS_PANE));
-
-*/
         return voteInventory;
+    }
+
+    public Inventory mafiaInventory(Inventory mafiaInventory, Player player) {
+        mafiaInventory = Bukkit.createInventory(null, 9, "Mafia Inventory");
+
+        ItemStack skull = new ItemStack(Material.SKULL_ITEM);
+        skull.setDurability((short) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
+
+        for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
+
+            skullMeta.setOwningPlayer(gamePlayer.getPlayer());
+            skullMeta.setDisplayName(gamePlayer.getName());
+            skull.setItemMeta(skullMeta);
+
+            mafiaInventory.addItem(skull);
+        }
+
+        return mafiaInventory;
+    }
+
+    public Inventory doctorInventory(Inventory doctorInventory, Player player)
+    {
+        doctorInventory = Bukkit.createInventory(null, 9 , "Doctor Inventory");
+
+
+        ItemStack skull = new ItemStack(Material.SKULL_ITEM);
+        skull.setDurability((short) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
+
+        for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
+
+            skullMeta.setOwningPlayer(gamePlayer.getPlayer());
+            skullMeta.setDisplayName(gamePlayer.getName());
+            skull.setItemMeta(skullMeta);
+
+            doctorInventory.addItem(skull);
+        }
+
+        return doctorInventory;
     }
 
     public ItemStack createItem(String name, Material material) {
@@ -72,32 +121,30 @@ public class GameInventory {
         itemStack.setItemMeta(itemMeta);
 
         return itemStack;
+
     }
 
-    public ItemStack skullItem(GamePlayer gamePlayer) {
 
-
-        ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1 , (short) SkullType.PLAYER.ordinal());
-        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-        skullMeta.setOwningPlayer(gamePlayer.getPlayer());
-        skullMeta.setDisplayName("§6" + gamePlayer.getName());
-        skull.setItemMeta(skullMeta);
-
-        return skull;
-    }
-
-    public void openInventory(Player player) {
-        player.openInventory(inventory);
-        return;
-    }
-
-    public void openVoteInventory(Player player) {
-
-        player.updateInventory();
-        player.openInventory(voteInventory(voteInventory, player));
+    public void show(GamePlayer gamePlayer) {
+        gamePlayer.getPlayer().updateInventory();
+        gamePlayer.getPlayer().openInventory(mainInventory(inventory,  gamePlayer.getPlayer()));
 
         return;
     }
 
+    public void showVoteInventory(GamePlayer gamePlayer) {
+
+        gamePlayer.getPlayer().updateInventory();
+        gamePlayer.getPlayer().openInventory(voteInventory(inventory,  gamePlayer.getPlayer()));
+
+        return;
+    }
+
+    public void showMafiaInventory(GamePlayer gamePlayer) {
+        gamePlayer.getPlayer().updateInventory();
+        gamePlayer.getPlayer().openInventory(mafiaInventory(inventory,  gamePlayer.getPlayer()));
+
+        return;
+    }
 
 }

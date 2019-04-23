@@ -1,6 +1,4 @@
-wait-ticks: 600
-day-ticks: 2400
-night-ticks: 2400
-vote-ticks: 1200
-mafia-number: 1
-citizen-number: 1
+wait-ticks: 100
+day-ticks: 100
+night-ticks: 600
+vote-ticks: 100

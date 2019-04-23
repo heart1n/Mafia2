@@ -1,7 +1,6 @@
 package heartin.plugin.mafia.Ability;
 
 import heartin.plugin.mafia.GamePlayer;
-import heartin.plugin.mafia.GameProcess;
 
 public class Ability {
 
@@ -32,8 +31,11 @@ public class Ability {
         return abilityName;
     }
 
+
     public static enum Type {
         MAFIA,
+        DOCTOR,
+        POLICE,
         CITIZEN;
     }
 }

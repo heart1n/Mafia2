@@ -31,7 +31,9 @@ public class CommandGameChat extends CommandComponent {
 
         GameProcess process = GamePlugin.getInstance().getProcess();
 
-        Ability mafia = process.getPlayerManager().getMafia(player);
+        GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(player);
+
+        Ability mafia = process.getPlayerManager().getMafia(gamePlayer);
 
         if (mafia.abilityType() == Ability.Type.MAFIA) {
 
