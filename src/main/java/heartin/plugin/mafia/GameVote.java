@@ -9,7 +9,8 @@ import java.util.Map;
 public class GameVote {
 
 
-    public  Map<String, Integer> vote = new HashMap();
+    public Map<String, Integer> vote = new HashMap();
+    public Map<GamePlayer, Integer> doctor = new HashMap();
     private final Map<GamePlayer, Boolean> voteCheckPlayer;
     private GameProcess process;
 
@@ -22,15 +23,13 @@ public class GameVote {
 
     public GamePlayer setMafiaVote(GamePlayer gamePlayer) {
 
-        Ability mafia = process.getPlayerManager().getMafia(gamePlayer);
+        Ability ability = process.getPlayerManager().getAbility(gamePlayer);
 
-        if (mafia.abilityType() == Ability.Type.MAFIA) {
+        if (ability.abilityType() == Ability.Type.MAFIA) {
             this.voteCheckPlayer.put(gamePlayer, true);
         }
-
         return gamePlayer;
     }
-
 
     public GamePlayer setVote(GamePlayer gamePlayer) {
 
@@ -59,4 +58,15 @@ public class GameVote {
         return gamePlayer;
     }
 
+    public GamePlayer setResurrection(GamePlayer gamePlayer) {
+        Ability ability = process.getPlayerManager().getAbility(gamePlayer);
+        if (ability.abilityType() == Ability.Type.DOCTOR) {
+
+            this.doctor.put(gamePlayer, Integer.valueOf(0));
+
+        }
+
+
+        return gamePlayer;
+    }
 }

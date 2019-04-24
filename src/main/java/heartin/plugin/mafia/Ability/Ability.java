@@ -36,6 +36,7 @@ public class Ability {
         MAFIA,
         DOCTOR,
         POLICE,
+        SPY,
         CITIZEN;
     }
 }

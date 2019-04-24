@@ -145,6 +145,13 @@ public final class GamePlayerManager {
     }
 
 
+    public Ability getAbility(GamePlayer gamePlayer) {
+
+        return this.playerAbility.get(gamePlayer);
+        // -> 플레이어 직업 호출
+    }
+
+
     public GamePlayer setMafia(GamePlayer gamePlayer) {
 
         this.onlineCitizen.remove(gamePlayer);
@@ -155,12 +162,6 @@ public final class GamePlayerManager {
         //  process.getScoreboard().setMafia(gamePlayer.getName());
 
         return gamePlayer;
-    }
-
-    public Ability getMafia(GamePlayer gamePlayer) {
-
-        return this.playerAbility.get(gamePlayer);
-        // -> 플레이어 직업 호출
     }
 
     public Set<GamePlayer> getOnlineMafia() {
@@ -211,12 +212,6 @@ public final class GamePlayerManager {
             this.unmodifiableDoctor = (doctor = Collections.unmodifiableSet(this.onlineDoctor));
         }
         return doctor;
-    }
-
-    public Ability getDoctor(GamePlayer gamePlayer) {
-
-        return this.playerAbility.get(gamePlayer);
-        // -> 플레이어 직업 호출
     }
 
     public GamePlayer setPolice(GamePlayer gamePlayer) {

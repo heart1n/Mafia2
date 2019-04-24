@@ -8,7 +8,7 @@ public class Spy extends  Ability {
 
     public Spy(GamePlayer gamePlayer) {
 
-        super(gamePlayer, "Spy", Type.MAFIA , description);
+        super(gamePlayer, "Spy", Type.SPY , description);
     }
 
     public String[] getDescription(String[] description) {

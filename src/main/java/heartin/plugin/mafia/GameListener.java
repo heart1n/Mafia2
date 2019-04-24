@@ -47,9 +47,6 @@ public class GameListener implements Listener {
         Player player = event.getEntity();
 
         GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(player);
-        Player killer = player.getKiller();
-        Ability mafia = process.getPlayerManager().getMafia(gamePlayer);
-
 
         process.getPlayerManager().setDeath(player);
 
@@ -78,8 +75,8 @@ public class GameListener implements Listener {
                     process.getInventory().showVoteInventory(gamePlayer);
                 }
                 if (itemStack.getItemMeta().getDisplayName().equalsIgnoreCase("§d채팅모드")) {
-                    Ability mafia = process.getPlayerManager().getMafia(gamePlayer);
-                    if (mafia.abilityType() == Ability.Type.MAFIA) {
+                    Ability ability = process.getPlayerManager().getAbility(gamePlayer);
+                    if (ability.abilityType() == Ability.Type.MAFIA) {
                         process.getChat().setMafiaChat(player);
                     } else {
                         player.sendMessage("당신은 마피아가 아닙니다.");
@@ -126,6 +123,27 @@ public class GameListener implements Listener {
                 player.sendMessage("투표시간이 아닙니다.");
             }
         }
+
+        // 의사 인벤토리
+        if (event.getInventory().getName().equalsIgnoreCase("Doctor Inventory"))
+        {
+            event.setCancelled(true);
+        }
+        try {
+            if (process.getVote().getVote(gamePlayer)) {
+                String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
+
+                process.getVote().vote.put(playerName, Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + 1);
+                process.getVote().removeVote(gamePlayer);
+                player.sendMessage(playerName + "를 다음 턴에 살립니다.");
+            } else {
+                player.sendMessage("선택권이 없습니다.");
+            }
+
+        } catch (NullPointerException e) {
+            player.sendMessage("지금은 선택시간이 아닙니다.");
+        }
+
     }
 
 

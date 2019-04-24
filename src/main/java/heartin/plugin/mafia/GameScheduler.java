@@ -520,6 +520,7 @@ public final class GameScheduler implements Runnable {
             for (GamePlayer str : topuser) {
 
                 str.getPlayer().setHealth(0D);
+
                 Bukkit.broadcastMessage(str.getName() + "마피아한테 죽었습니다.");
             }
 
