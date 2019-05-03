@@ -33,14 +33,14 @@ public class CommandGameChat extends CommandComponent {
 
         GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(player);
 
-        Ability mafia = process.getPlayerManager().getMafia(gamePlayer);
+        /*Ability mafia = process.getPlayerManager().getMafia(gamePlayer);
 
         if (mafia.abilityType() == Ability.Type.MAFIA) {
 
             process.getChat().setMafiaChat(player);
         } else {
             player.sendMessage("당신은 마피아가 아닙니다.");
-        }
+        }*/
 
         return true;
     }

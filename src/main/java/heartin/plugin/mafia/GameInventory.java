@@ -41,7 +41,7 @@ public class GameInventory {
         } else if (ability.abilityType() == Ability.Type.DOCTOR) {
             inventory.setItem(15, createItem("§e직업능력", Material.BED));
         } else if (ability.abilityType() == Ability.Type.POLICE) {
-            inventory.setItem(15, createItem("§b직업능력", Material.STICK));
+            inventory.setItem(15, createItem("§d직업능력", Material.STICK));
         }
 
         for (int i = 0; i < 9; i++) {

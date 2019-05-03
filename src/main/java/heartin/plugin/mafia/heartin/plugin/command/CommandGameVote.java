@@ -1,5 +1,6 @@
 package heartin.plugin.mafia.heartin.plugin.command;
 
+import heartin.plugin.mafia.Ability.Ability;
 import heartin.plugin.mafia.GamePlayer;
 import heartin.plugin.mafia.GamePlugin;
 import heartin.plugin.mafia.GameProcess;

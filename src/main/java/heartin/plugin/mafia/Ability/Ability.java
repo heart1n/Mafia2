@@ -31,6 +31,11 @@ public class Ability {
         return abilityName;
     }
 
+    public GamePlayer getAbilityPlayer()
+    {
+        return gamePlayer;
+    }
+
 
     public static enum Type {
         MAFIA,

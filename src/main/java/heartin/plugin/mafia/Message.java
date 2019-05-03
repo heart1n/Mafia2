@@ -8,6 +8,8 @@ import org.bukkit.entity.Player;
 
 public class Message {
 
+    public static String SYSTEM = "§r[§bMessage§r]";
+
     public static void sendCitizen(GamePlayer gamePlayer) {
 
         Player player = gamePlayer.getPlayer();

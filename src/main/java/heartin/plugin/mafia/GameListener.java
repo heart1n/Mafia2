@@ -84,20 +84,30 @@ public class GameListener implements Listener {
                 }
                 if (itemStack.getItemMeta().getDisplayName().equalsIgnoreCase("§b직업능력")) {
                     process.getInventory().showMafiaInventory(gamePlayer);
+                } else if (itemStack.getItemMeta().getDisplayName().equalsIgnoreCase("§e직업능력")) {
+                    process.getInventory().showDoctorInventory(gamePlayer);
+                } else if (itemStack.getItemMeta().getDisplayName().equalsIgnoreCase("§d직업능력")) {
+                    process.getInventory().showPoliceInventory(gamePlayer);
                 }
             }
             // Vote inventory
             if (event.getInventory().getName().equalsIgnoreCase("Vote Inventory")) {
                 event.setCancelled(true);
+
+                if (itemStack.getItemMeta() == null) {
+                    return;
+                }
+
                 try {
-                    if (process.getVote().getVote(gamePlayer)) {
+                    if (process.getVote().voteCheckPlayer.get(gamePlayer)) {
                         String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
 
                         process.getVote().vote.put(playerName, Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + 1);
                         process.getVote().removeVote(gamePlayer);
                         player.sendMessage(playerName + "에게 투표를 합니다.");
+                        Bukkit.broadcastMessage(playerName + ": " + Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + "표");
                     } else {
-                        player.sendMessage("투표권이 없습니다");
+                        player.sendMessage("이미 투표를 하셨습니다.");
                     }
 
                 } catch (NullPointerException e) {
@@ -105,43 +115,75 @@ public class GameListener implements Listener {
                 }
             }
         }
-        // Mafia inventory
-        if (event.getInventory().getName().equalsIgnoreCase("Mafia Inventory")) {
-            event.setCancelled(true);
-            try {
-                if (process.getVote().getVote(gamePlayer)) {
+
+        // 마피아 인벤토리
+        if (event.getClickedInventory() != null) {
+            if (event.getInventory().getName().equalsIgnoreCase("Mafia Inventory")) {
+                event.setCancelled(true);
+
+                if (itemStack.getItemMeta() == null) {
+                    return;
+                }
+                //  if (process.getVote().getVote(gamePlayer))
+                {
                     String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
 
                     process.getVote().vote.put(playerName, Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + 1);
                     process.getVote().removeVote(gamePlayer);
-                    player.sendMessage(playerName + "에게 투표를 합니다.");
-                } else {
-                    player.sendMessage("투표권이 없습니다");
+                    player.sendMessage(playerName + "에게 §c투표를 합니다.");
+                    player.sendMessage(Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + "표");
                 }
-
-            } catch (NullPointerException e) {
-                player.sendMessage("투표시간이 아닙니다.");
             }
         }
 
         // 의사 인벤토리
-        if (event.getInventory().getName().equalsIgnoreCase("Doctor Inventory"))
-        {
-            event.setCancelled(true);
-        }
-        try {
-            if (process.getVote().getVote(gamePlayer)) {
+        if (event.getClickedInventory() != null) {
+            if (event.getInventory().getName().equalsIgnoreCase("Doctor Inventory")) {
+                event.setCancelled(true);
+
+                if (itemStack.getItemMeta() == null) {
+                    return;
+                }
+
                 String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
+                process.getVote().setResurrection(playerName);
 
-                process.getVote().vote.put(playerName, Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + 1);
-                process.getVote().removeVote(gamePlayer);
-                player.sendMessage(playerName + "를 다음 턴에 살립니다.");
-            } else {
-                player.sendMessage("선택권이 없습니다.");
+                player.sendMessage(playerName + "를 살립니다.");
+                player.sendMessage(process.getVote().resurrection.get(playerName) + " = value");
             }
+        }
 
-        } catch (NullPointerException e) {
-            player.sendMessage("지금은 선택시간이 아닙니다.");
+        //경찰 인벤토리
+        if (event.getClickedInventory() != null) {
+            if (event.getInventory().getName().equalsIgnoreCase("Police Inventory")) {
+                event.setCancelled(true);
+
+
+                String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
+                Player displayPlayer = Bukkit.getPlayer(playerName);
+                GamePlayer mafia = process.getPlayerManager().getGamePlayer(displayPlayer);
+                player.sendMessage(mafia.getName() + "를 조사합니다.");
+
+                try {
+
+                    if (process.getVote().arrest.get(gamePlayer)) {
+                        Ability ability = process.getPlayerManager().getAbility(mafia);
+                        if (ability.abilityType() == Ability.Type.MAFIA) {
+                            gamePlayer.getPlayer().sendMessage(mafia.getName() + "마피아 입니다.");
+
+                        } else {
+                            gamePlayer.getPlayer().sendMessage(mafia.getName() + "지목한 사람은 마피아가 아닙니다.");
+
+                        }
+                    } else {
+                        gamePlayer.getPlayer().sendMessage("이미 골랐습니다.");
+                    }
+                    process.getVote().clearArrest(gamePlayer);
+
+                } catch (NullPointerException e) {
+                    player.sendMessage("지금은 사용할 수 없습니다.");
+                }
+            }
         }
 
     }
@@ -170,16 +212,13 @@ public class GameListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event)
-    {
+    public void onPlayerInteract(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
 
-        if ((item != null) && (item.getType() == Material.STICK))
-        {
+        if ((item != null) && (item.getType() == Material.STICK)) {
             Action action = event.getAction();
 
-            if ((action == Action.RIGHT_CLICK_AIR) || (action == Action.RIGHT_CLICK_BLOCK))
-            {
+            if ((action == Action.RIGHT_CLICK_AIR) || (action == Action.RIGHT_CLICK_BLOCK)) {
                 Player player = event.getPlayer();
                 GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(player);
 
