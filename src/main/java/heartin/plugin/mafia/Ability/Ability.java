@@ -42,6 +42,8 @@ public class Ability {
         DOCTOR,
         POLICE,
         SPY,
+        SOLDIER,
+        MEDIUM,
         CITIZEN;
     }
 }

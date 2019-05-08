@@ -60,4 +60,15 @@ public class Message {
         Packet.INFO.chat(builder.build(), ChatType.GAME_INFO).send((Player) player);
     }
 
+    public static void sendSpy(GamePlayer gamePlayer)
+    {
+        Player player = gamePlayer.getPlayer();
+
+        TextComponentBuilder builder = TextComponent.builder();
+        builder.object().text("§6당신의 §r직업 §r: §4스파이");
+
+        Packet.INFO.chat(builder.build(), ChatType.GAME_INFO).send((Player) player);
+
+    }
+
 }

@@ -10,9 +10,13 @@ public class GameVote {
 
     public Map<String, Integer> vote = new HashMap();
 
-    public Map<String, Boolean> resurrection = new HashMap();
+    public Map<GamePlayer, Boolean> resurrection = new HashMap();
     public Map<GamePlayer, Boolean> arrest = new HashMap();
+    public Map<GamePlayer, Boolean> spy = new HashMap();
     public Map<GamePlayer, Boolean> voteCheckPlayer = new HashMap();
+    public Map<GamePlayer, Boolean> abilityCheckPlayer = new HashMap();
+    public Map<GamePlayer, Integer> mafiaVote = new HashMap();
+
     private GameProcess process;
 
     public GameVote(GameProcess process) {
@@ -20,14 +24,43 @@ public class GameVote {
 
     }
 
+    public GamePlayer setAbilityCheck(GamePlayer gamePlayer)
+    {
+        this.abilityCheckPlayer.put(gamePlayer, true);
+
+        return gamePlayer;
+    }
+
+    public GamePlayer removeAbilityCheck(GamePlayer gamePlayer)
+    {
+        this.abilityCheckPlayer.remove(gamePlayer);
+
+        return gamePlayer;
+    }
+
+    public Boolean getAbilityCheck(GamePlayer gamePlayer)
+    {
+
+        Boolean bool = this.abilityCheckPlayer.get(gamePlayer);
+
+        return bool;
+    }
+
+    public void clearAbilityCheck()
+    {
+        this.abilityCheckPlayer.clear();
+    }
+
     public GamePlayer setMafiaVote(GamePlayer gamePlayer) {
 
-        Ability ability = process.getPlayerManager().getAbility(gamePlayer);
+        this.mafiaVote.put(gamePlayer, Integer.valueOf(0));
 
-        if (ability.abilityType() == Ability.Type.MAFIA) {
-            this.voteCheckPlayer.put(gamePlayer, true);
-        }
+        return gamePlayer;
+    }
 
+    public GamePlayer removeMafiaVote(GamePlayer gamePlayer)
+    {
+        this.mafiaVote.remove(gamePlayer);
         return gamePlayer;
     }
 
@@ -48,12 +81,6 @@ public class GameVote {
         return gamePlayer;
     }
 
-  /*  public Boolean getVote(GamePlayer gamePlayer) {
-        Boolean bool = this.voteCheckPlayer.get(gamePlayer);
-
-        return bool;
-    }*/
-
     public GamePlayer clearVote(GamePlayer gamePlayer) {
         this.voteCheckPlayer.clear();
         this.vote.clear();
@@ -61,20 +88,20 @@ public class GameVote {
         return gamePlayer;
     }
 
-    public String setResurrection(String playerName) {
+    public GamePlayer setResurrection(GamePlayer gamePlayer) {
 
-        this.resurrection.put(playerName, true);
+        this.resurrection.put(gamePlayer, true);
 
-        return playerName;
+        return gamePlayer;
     }
 
-    public Boolean getResurrction(String playerName)
+    public Boolean getResurrection(GamePlayer gamePlayer)
     {
-        Boolean bool = this.resurrection.get(playerName);
+
+        Boolean bool = this.resurrection.get(gamePlayer);
 
         return bool;
     }
-
     public void clearResurrection() {
 
         this.resurrection.clear();
