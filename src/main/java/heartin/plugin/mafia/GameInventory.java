@@ -36,11 +36,11 @@ public class GameInventory {
         Ability ability = process.getPlayerManager().getAbility(gamePlayer);
 
 
-        if (ability.abilityType() == Ability.Type.MAFIA) {
+        if (ability.getAbilityType() == Ability.Type.MAFIA) {
             inventory.setItem(15, createItem("§b직업능력", Material.DIAMOND_SWORD));
-        } else if (ability.abilityType() == Ability.Type.DOCTOR) {
+        } else if (ability.getAbilityType() == Ability.Type.DOCTOR) {
             inventory.setItem(15, createItem("§e직업능력", Material.BED));
-        } else if (ability.abilityType() == Ability.Type.POLICE) {
+        } else if (ability.getAbilityType() == Ability.Type.POLICE) {
             inventory.setItem(15, createItem("§d직업능력", Material.STICK));
         }
 
@@ -190,16 +190,14 @@ public class GameInventory {
         return;
     }
 
-    public void showDoctorInventory(GamePlayer gamePlayer)
-    {
+    public void showDoctorInventory(GamePlayer gamePlayer) {
         gamePlayer.getPlayer().updateInventory();
         gamePlayer.getPlayer().openInventory(doctorInventory(inventory, gamePlayer.getPlayer()));
 
         return;
     }
 
-    public void showPoliceInventory(GamePlayer gamePlayer)
-    {
+    public void showPoliceInventory(GamePlayer gamePlayer) {
         gamePlayer.getPlayer().updateInventory();
         gamePlayer.getPlayer().openInventory(policeInventory(inventory, gamePlayer.getPlayer()));
 

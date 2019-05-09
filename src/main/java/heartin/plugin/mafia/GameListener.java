@@ -75,12 +75,7 @@ public class GameListener implements Listener {
                     process.getInventory().showVoteInventory(gamePlayer);
                 }
                 if (itemStack.getItemMeta().getDisplayName().equalsIgnoreCase("§d채팅모드")) {
-                    Ability ability = process.getPlayerManager().getAbility(gamePlayer);
-                    if (ability.abilityType() == Ability.Type.MAFIA) {
-                        process.getChat().setMafiaChat(player);
-                    } else {
-                        player.sendMessage("마피아만 사용할 수 있습니다.");
-                    }
+                    process.getChat().setMafiachat(gamePlayer);
                 }
                 if (itemStack.getItemMeta().getDisplayName().equalsIgnoreCase("§b직업능력")) {
                     process.getInventory().showMafiaInventory(gamePlayer);
@@ -103,14 +98,14 @@ public class GameListener implements Listener {
 
                         process.getVote().vote.put(playerName, Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + 1);
                         process.getVote().removeVote(gamePlayer);
-                        player.sendMessage(playerName + "에게 투표를 합니다.");
+                        player.sendMessage(Message.SYSTEM + "§b" +playerName + "§r에게 투표를 합니다.");
                         Bukkit.broadcastMessage(playerName + ": " + Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + "표");
                     } else {
-                        player.sendMessage("이미 투표를 하셨습니다.");
+                        player.sendMessage(Message.SYSTEM + "이미 투표를 하셨습니다.");
                     }
 
                 } catch (NullPointerException e) {
-                    player.sendMessage("투표시간이 아닙니다.");
+                    player.sendMessage(Message.SYSTEM + "투표시간이 아닙니다.");
                 }
             }
         }
@@ -126,19 +121,22 @@ public class GameListener implements Listener {
                 if (process.getVote().getAbilityCheck(gamePlayer))
                 {
                     String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
+                    Player displayPlayer = Bukkit.getPlayer(playerName);
+                    GamePlayer killed = process.getPlayerManager().getGamePlayer(displayPlayer);
 
-                    process.getVote().mafiaVote.put(gamePlayer, Integer.valueOf((Integer) process.getVote().mafiaVote.get(gamePlayer)).intValue() + 1);
+                    process.getVote().mafiaVote.put(killed, Integer.valueOf((Integer) process.getVote().mafiaVote.get(killed)).intValue() + 1);
 
-                    player.sendMessage(playerName + "에게 §c투표를 합니다.");
-                    player.sendMessage(Integer.valueOf((Integer) process.getVote().mafiaVote.get(gamePlayer)).intValue() + "표");
+                    player.sendMessage(Message.SYSTEM + killed.getName() + "에게 §c투표를 합니다.");
+                    Bukkit.broadcastMessage(killed.getName() + Integer.valueOf((Integer) process.getVote().mafiaVote.get(killed)).intValue() + "표");
 
-                    process.getVote().removeMafiaVote(gamePlayer);
                     process.getVote().removeAbilityCheck(gamePlayer);
                 }
                 else
                 {
-                    gamePlayer.getPlayer().sendMessage("이미 능력을 사용했습니다.");
+                    player.sendMessage(Message.SYSTEM + "이미 능력을 사용했습니다.");
                 }
+
+
             }
         }
         // 스파이 인벤토리
@@ -157,12 +155,13 @@ public class GameListener implements Listener {
                 if (process.getVote().getAbilityCheck(gamePlayer)) {
                     Ability ability = process.getPlayerManager().getAbility(mafia);
 
-                    if (ability.abilityType() == Ability.Type.MAFIA) {
+                    if (ability.getAbilityType() == Ability.Type.MAFIA) {
                         mafia.getPlayer().sendMessage("스파이가 마피아에게 접선했습니다.");
                         gamePlayer.getPlayer().sendMessage("스파이가 마피아에게 접선했습니다.");
+
+                        process.getChat().setMafiachat(gamePlayer);
                     } else {
                         gamePlayer.getPlayer().sendMessage(mafia.getName() + " 지목한 사람의 직업은 " + ability.getAbilityName() + " 입니다.");
-
                     }
                     process.getVote().removeAbilityCheck(gamePlayer);
                 }else
@@ -180,22 +179,24 @@ public class GameListener implements Listener {
                 if (itemStack.getItemMeta() == null) {
                     return;
                 }
-                if (process.getVote().getAbilityCheck(gamePlayer))
+                try
                 {
-                    String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
-                    Player displayPlayer = Bukkit.getPlayer(playerName);
-                    GamePlayer resurrectionPlayer = process.getPlayerManager().getGamePlayer(displayPlayer);
+                    if (process.getVote().getAbilityCheck(gamePlayer))
+                    {
+                        String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
+                        Player displayPlayer = Bukkit.getPlayer(playerName);
+                        GamePlayer resurrectionPlayer = process.getPlayerManager().getGamePlayer(displayPlayer);
 
-                    process.getVote().setResurrection(resurrectionPlayer);
+                        process.getVote().setResurrection(resurrectionPlayer);
 
-                    player.sendMessage(playerName + "를 살립니다.");
-                    process.getVote().removeAbilityCheck(gamePlayer);
+                        player.sendMessage(Message.SYSTEM + "§b" + playerName + "를 살립니다.");
+                        process.getVote().removeAbilityCheck(gamePlayer);
+                    }
                 }
-                else
+                catch (NullPointerException e)
                 {
-                    gamePlayer.getPlayer().sendMessage("이미 능력을 사용했습니다.");
+                    player.sendMessage(Message.SYSTEM  + "이미 능력을 사용했습니다.");
                 }
-
             }
         }
 
@@ -211,20 +212,20 @@ public class GameListener implements Listener {
                 try {
                     if (process.getVote().getAbilityCheck(gamePlayer)) {
                         Ability ability = process.getPlayerManager().getAbility(mafia);
-                        if (ability.abilityType() == Ability.Type.MAFIA) {
-                            gamePlayer.getPlayer().sendMessage(mafia.getName() + "마피아 입니다.");
+                        if (ability.getAbilityType() == Ability.Type.MAFIA) {
+                            gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "§b" + mafia.getName() + " 는 마피아 입니다.");
 
                         } else {
-                            gamePlayer.getPlayer().sendMessage(mafia.getName() + "지목한 사람은 마피아가 아닙니다.");
+                            gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "§b" + mafia.getName() + "는 마피아가 아닙니다.");
 
                         }
                         process.getVote().removeAbilityCheck(gamePlayer);
                         process.getVote().clearArrest(gamePlayer);
                     } else {
-                        gamePlayer.getPlayer().sendMessage("이미 능력을 사용했습니다.");
+                        gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "이미 능력을 사용했습니다.");
                     }
                 } catch (NullPointerException e) {
-                    player.sendMessage("지금은 사용할 수 없습니다.");
+                    player.sendMessage(Message.SYSTEM + "지금은 사용할 수 없습니다.");
                 }
             }
         }

@@ -2,6 +2,7 @@ package heartin.plugin.mafia;
 
 import heartin.plugin.mafia.Ability.Ability;
 import heartin.plugin.mafia.Ability.Citizen;
+import heartin.plugin.mafia.Ability.Soldier;
 import heartin.plugin.mafia.heartin.plugin.command.CommandGameVote;
 import nemo.mc.packet.Packet;
 import org.bukkit.Bukkit;
@@ -50,35 +51,48 @@ public final class GameScheduler implements Runnable {
                 GamePlayer mafia = (GamePlayer) citizens.remove(random.nextInt(citizens.size()));
                 GamePlayer doctor = (GamePlayer) citizens.remove(random.nextInt(citizens.size()));
                 GamePlayer police = (GamePlayer) citizens.remove(random.nextInt(citizens.size()));
+                GamePlayer spy = (GamePlayer) citizens.remove(random.nextInt(citizens.size()));
+                GamePlayer soldier = (GamePlayer) citizens.remove(random.nextInt(citizens.size()));
 
                 if (mafia.isOnline()) {
-
                     Player player = mafia.getPlayer();
                     GamePlayer gamePlayer = (GamePlayer) process.getPlayerManager().getGamePlayer(player);
                     process.getPlayerManager().setMafia(gamePlayer);
+                    process.getChat().setMafiachat(gamePlayer);
                 }
 
                 if (doctor.isOnline()) {
                     Player player = doctor.getPlayer();
                     GamePlayer gamePlayer = (GamePlayer) process.getPlayerManager().getGamePlayer(player);
-
                     process.getPlayerManager().setDoctor(gamePlayer);
                 }
 
                 if (police.isOnline()) {
                     Player player = police.getPlayer();
                     GamePlayer gamePlayer = (GamePlayer) process.getPlayerManager().getGamePlayer(player);
-
                     process.getPlayerManager().setPolice(gamePlayer);
                 }
 
-                for (GamePlayer gamePlayer : citizens) {
-                    if (!gamePlayer.isOnline())
-                        continue;
-                    Player player = gamePlayer.getPlayer();
-
-                    process.getPlayerManager().setCitizen(gamePlayer);
+                if (spy.isOnline())
+                {
+                    Player player = spy.getPlayer();
+                    GamePlayer gamePlayer = (GamePlayer) process.getPlayerManager().getGamePlayer(player);
+                    process.getPlayerManager().setSpy(gamePlayer);
                 }
+
+                if(soldier.isOnline())
+                {
+                    Player player = soldier.getPlayer();
+                    GamePlayer gamePlayer = (GamePlayer) process.getPlayerManager().getGamePlayer(player);
+                    process.getPlayerManager().setSoldier(gamePlayer);
+                }
+            }
+
+            for (GamePlayer gamePlayer : citizens) {
+                if (!gamePlayer.isOnline())
+                    continue;
+                Player player = gamePlayer.getPlayer();
+                process.getPlayerManager().setCitizen(gamePlayer);
             }
 
             for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
@@ -86,13 +100,12 @@ public final class GameScheduler implements Runnable {
                 Player player = gamePlayer.getPlayer();
 
                 process.getChat().setGeneralChat(player);
+                process.getScoreboard().registerPlayer(gamePlayer);
+                process.getVote().clear();
 
                 player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 10), true);
                 Packet titlePacket = Packet.TITLE.compound("§6마피아 게임을 시작합니다", "§7직업을 확인해주세요.", 5, 60, 10);
                 titlePacket.send(player);
-
-                process.getScoreboard().registerPlayer(gamePlayer);
-
 
                 player.sendMessage("잠시 후 게임이 시작됩니다.");
             }
@@ -127,13 +140,19 @@ public final class GameScheduler implements Runnable {
                 for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
                     Message.sendMafia(gamePlayer);
                 }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy())
+                {
+                    Message.sendSpy(gamePlayer);
+                }
+                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier())
+                {
+                    Message.sendSoldier(gameplayer);
+                }
                 for (GamePlayer gamePlayer : process.getPlayerManager().getDeathPlayers()) {
                     Message.sendGhost(gamePlayer);
                 }
                 return this;
             }
-
-            Bukkit.broadcastMessage("end WaitTask");
 
             for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
                 Player player = gamePlayer.getPlayer();
@@ -143,7 +162,7 @@ public final class GameScheduler implements Runnable {
             }
 
             for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineDoctor()) {
-                gamePlayer.getPlayer().sendMessage(Message.SYSTEM + " 원하는 플레이어 1명을 마피아를 피해 살릴 수 있습니다.");
+                gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "의사는 원하는 플레이어 1명을 마피아를 피해 살릴 수 있습니다.");
                 process.getVote().setAbilityCheck(gamePlayer);
             }
 
@@ -207,6 +226,14 @@ public final class GameScheduler implements Runnable {
                 for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
                     Message.sendMafia(gamePlayer);
                 }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy())
+                {
+                    Message.sendSpy(gamePlayer);
+                }
+                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier())
+                {
+                    Message.sendSoldier(gameplayer);
+                }
                 for (GamePlayer gamePlayer : process.getPlayerManager().getDeathPlayers()) {
                     Message.sendGhost(gamePlayer);
                 }
@@ -220,16 +247,11 @@ public final class GameScheduler implements Runnable {
                 Player player = gamePlayer.getPlayer();
 
                 process.getVote().setVote(gamePlayer);
-                player.sendMessage("투표권 지급");
+                process.getVote().resurrection.put(gamePlayer, false);
 
                 Packet titlePacket = Packet.TITLE.compound("§6투표시간이 되었습니다", "§7투표를 진행해주세요.", 5, 60, 10);
                 titlePacket.send(player);
             }
-            Bukkit.broadcastMessage("end DayTask");
-
-
-            // GameProcess process = GameScheduler.this.process;
-            //     process.getPlugin().processStop();
 
             return new VoteTask();
         }
@@ -248,7 +270,7 @@ public final class GameScheduler implements Runnable {
                     }
 
                     remainbar.setColor(BarColor.PINK);
-                    remainbar.setTitle(String.format("§d남은시간§r§l %02d:%02d§r ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                    remainbar.setTitle(String.format("§d남은시간 §r§l%02d:%02d§r ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                     GameScheduler.this.process.getScoreboard().setDisplayName(String.format("§d§l남은시간 §f§l%02d:%02d§r  ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                 }
             } else {
@@ -289,6 +311,14 @@ public final class GameScheduler implements Runnable {
                 for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
                     Message.sendMafia(gamePlayer);
                 }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy())
+                {
+                    Message.sendSpy(gamePlayer);
+                }
+                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier())
+                {
+                    Message.sendSoldier(gameplayer);
+                }
                 for (GamePlayer gamePlayer : process.getPlayerManager().getDeathPlayers()) {
                     Message.sendGhost(gamePlayer);
                 }
@@ -296,22 +326,105 @@ public final class GameScheduler implements Runnable {
             }
             //task run
 
+            Collection<Integer> vote = process.getVote().vote.values();
+            Integer max = (Integer) Collections.max(vote);
+
+            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
+                if (process.getVote().vote.get(gamePlayer.getName()) == max) {
+                    voteMax.put(gamePlayer, max);
+                }
+            }
+            Set<String> user = process.getVote().vote.keySet();
+            Set<GamePlayer> topuser = voteMax.keySet();
+
+            Bukkit.broadcastMessage("§6─────────── §b투표 결과 §6─────────────");
+            for (String str : user) {
+                Bukkit.broadcastMessage(str + " : " + process.getVote().vote.get(str) + " 표");
+            }
+
+            if (voteMax.size() >= 2) {
+                Bukkit.broadcastMessage("같은 표가 있으므로 투표를 종료합니다.");
+
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
+                    Player player = gamePlayer.getPlayer();
+
+                    process.getVote().clearVote(gamePlayer);
+
+                    process.getVote().mafiaVote.put(gamePlayer, Integer.valueOf(0));
+
+                    Packet titlePacket = Packet.TITLE.compound("§6투표시간이 종료되었습니다", "§7밤이 되었습니다..", 5, 60, 10);
+                    titlePacket.send(player);
+                }
+
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
+                    Player player = gamePlayer.getPlayer();
+
+                    process.getVote().setAbilityCheck(gamePlayer);
+                    process.getVote().setMafiaVote(gamePlayer);
+
+                    gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "죽일 플레이어를 선택 해주세요.");
+                }
+
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePolice()) {
+                    process.getVote().setAbilityCheck(gamePlayer);
+                    process.getVote().setArrest(gamePlayer);
+
+                    gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "마피아로 의심되는 플레이어를 선택 해주세요.");
+                }
+
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy()) {
+                    process.getVote().setAbilityCheck(gamePlayer);
+
+                    gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "선택한 플레이어의 직업을 알아낼 수 있습니다.");
+                }
+
+                return new NightTask();
+            }
+            for (GamePlayer str : topuser) {
+                Bukkit.broadcastMessage("§6─────────── §b최다 득표 §6─────────────");
+                Bukkit.broadcastMessage(str.getName() + " : " + voteMax.get(str) + " 표");
+
+                str.getPlayer().setHealth(0D);
+                Bukkit.broadcastMessage(str.getName() + "사망");
+            }
+
             for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
                 Player player = gamePlayer.getPlayer();
 
                 process.getVote().clearVote(gamePlayer);
-                //  process.getVote().setVote(gamePlayer);
+                process.getVote().mafiaVote.put(gamePlayer, Integer.valueOf(0));
 
-                Packet titlePacket = Packet.TITLE.compound("§6투표시간이 종료되었습니다", "§7아무말아무말", 5, 60, 10);
+                Packet titlePacket = Packet.TITLE.compound("§6투표시간이 종료되었습니다", "§7밤이 되었습니다..", 5, 60, 10);
                 titlePacket.send(player);
+                voteMax.clear();
             }
 
-            Bukkit.broadcastMessage("end VoteTask");
+            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
+                Player player = gamePlayer.getPlayer();
+
+                process.getVote().setAbilityCheck(gamePlayer);
+                process.getVote().setMafiaVote(gamePlayer);
+
+                gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "죽일 플레이어를 선택 해주세요.");
+            }
+
+            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePolice()) {
+                process.getVote().setAbilityCheck(gamePlayer);
+                process.getVote().setArrest(gamePlayer);
+
+                gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "마피아로 의심되는 플레이어를 선택 해주세요.");
+            }
+
+            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy()) {
+                process.getVote().setAbilityCheck(gamePlayer);
+
+                gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "선택한 플레이어의 직업을 알아낼 수 있습니다.");
+            }
 
             GameProcess process = GameScheduler.this.process;
             // process.getPlugin().processStop();
 
-            return new VoteKillTask();
+            return new NightTask();
         }
 
         private void updateTime() {
@@ -344,112 +457,6 @@ public final class GameScheduler implements Runnable {
         }
     }
 
-    private class VoteKillTask implements GameTask {
-
-        VoteKillTask() {
-        }
-
-        public GameTask run() {
-
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineCitizen()) {
-                Message.sendCitizen(gamePlayer);
-            }
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineDoctor()) {
-                Message.sendDoctor(gamePlayer);
-            }
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePolice()) {
-                Message.sendPolice(gamePlayer);
-            }
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
-                Message.sendMafia(gamePlayer);
-            }
-            for (GamePlayer gamePlayer : process.getPlayerManager().getDeathPlayers()) {
-                Message.sendGhost(gamePlayer);
-            }
-            //task run
-
-
-            Collection vote = process.getVote().vote.values();
-            Integer max = (Integer) Collections.max(vote);
-
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
-                if (process.getVote().vote.get(gamePlayer.getName()) == max) {
-                    voteMax.put(gamePlayer, max);
-                }
-            }
-            Set<String> user = process.getVote().vote.keySet();
-            Set<GamePlayer> topuser = voteMax.keySet();
-
-            Bukkit.broadcastMessage("==================투표=====================");
-            for (String str : user) {
-                Bukkit.broadcastMessage(str + " : " + process.getVote().vote.get(str) + " 표");
-            }
-
-            if (voteMax.size() >= 2) {
-                Bukkit.broadcastMessage("최다 득표가 2명 이상입니다");
-
-                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers())
-                {
-                    Player player = gamePlayer.getPlayer();
-
-                    process.getVote().clearVote(gamePlayer);
-                    process.getVote().vote.put(gamePlayer.getName(), Integer.valueOf(0));
-
-                    Packet titlePacket = Packet.TITLE.compound("§6투표시간이 종료되었습니다", "§7밤이 되었습니다..", 5, 60, 10);
-                    titlePacket.send(player);
-                }
-
-                return new NightTask();
-            }
-            for (GamePlayer str : topuser) {
-                Bukkit.broadcastMessage("================최다득=======================");
-                Bukkit.broadcastMessage(str.getName() + " : " + voteMax.get(str) + " 표");
-
-                str.getPlayer().setHealth(0D);
-                Bukkit.broadcastMessage(str.getName() + "사망");
-            }
-
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
-                Player player = gamePlayer.getPlayer();
-
-                process.getVote().clearVote(gamePlayer);
-                process.getVote().vote.put(gamePlayer.getName(), Integer.valueOf(0));
-
-                Packet titlePacket = Packet.TITLE.compound("§6투표시간이 종료되었습니다", "§7밤이 되었습니다..", 5, 60, 10);
-                titlePacket.send(player);
-                voteMax.clear();
-            }
-
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
-                Player player = gamePlayer.getPlayer();
-
-                process.getVote().setMafiaVote(gamePlayer);
-                player.sendMessage("마피아 투표권 지급");
-            }
-
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePolice()) {
-                process.getVote().setAbilityCheck(gamePlayer);
-                process.getVote().setArrest(gamePlayer);
-
-                gamePlayer.getPlayer().sendMessage("마피아로 의심되는 플레이어를 골라주세요.");
-            }
-
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy())
-            {
-                process.getVote().setAbilityCheck(gamePlayer);
-
-                gamePlayer.getPlayer().sendMessage("선택한 플레이어의 직업을 알아낼 수 있습니다.");
-            }
-
-            Bukkit.broadcastMessage("end VoteKillTask");
-
-            GameProcess process = GameScheduler.this.process;
-            // process.getPlugin().processStop();
-
-            return new NightTask();
-        }
-    }
-
     private class NightTask implements GameTask {
 
         private int remainTicks = GameConfig.nightTicks;
@@ -459,36 +466,56 @@ public final class GameScheduler implements Runnable {
         }
 
         public GameTask run() {
-                    if (--this.remainTicks > 0) {
-                        updateTime();
+            if (--this.remainTicks > 0) {
+                updateTime();
 
-                        for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineCitizen()) {
-                            Message.sendCitizen(gamePlayer);
-                        }
-                        for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineDoctor()) {
-                            Message.sendDoctor(gamePlayer);
-                        }
-                        for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePolice()) {
-                            Message.sendPolice(gamePlayer);
-                        }
-                        for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
-                            Message.sendMafia(gamePlayer);
-                        }
-                        for (GamePlayer gamePlayer : process.getPlayerManager().getDeathPlayers()) {
-                            Message.sendGhost(gamePlayer);
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineCitizen()) {
+                    Message.sendCitizen(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineDoctor()) {
+                    Message.sendDoctor(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePolice()) {
+                    Message.sendPolice(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
+                    Message.sendMafia(gamePlayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy())
+                {
+                    Message.sendSpy(gamePlayer);
+                }
+                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier())
+                {
+                    Message.sendSoldier(gameplayer);
+                }
+                for (GamePlayer gamePlayer : process.getPlayerManager().getDeathPlayers()) {
+                    Message.sendGhost(gamePlayer);
                 }
 
                 return this;
             }
+
+            // Collection<Integer> vote = process.getVote().vote.values();
+            //  Integer max = (Integer) Collections.max(vote);
+
+            //  for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
+            //     if (process.getVote().vote.get(gamePlayer.getName()) == max) {
+            //         voteMax.put(gamePlayer, max);
+            //      }
+            //   }
+            Set<String> user = process.getVote().vote.keySet();
+            Set<GamePlayer> topuser = voteMax.keySet();
+
 
             Map<GamePlayer, Integer> mafiaVoteMax = new HashMap();
 
             Collection vote = process.getVote().mafiaVote.values();
             Integer max = (Integer) Collections.max(vote);
 
+
             for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
-                if (process.getVote().mafiaVote.get(gamePlayer).intValue() == max)
-                {
+                if (process.getVote().mafiaVote.get(gamePlayer) == 1) {
                     mafiaVoteMax.put(gamePlayer, max);
                 }
             }
@@ -498,15 +525,24 @@ public final class GameScheduler implements Runnable {
 
             for (GamePlayer gamePlayer : top) {
 
-                if (process.getVote().getResurrection(gamePlayer))
-                {
-                    Bukkit.broadcastMessage("의사가 플레이어를 살렸습니다.");
-                    continue;
-                }
-                String playerName = gamePlayer.getName();
+                Ability ability = process.getPlayerManager().getAbility(gamePlayer);
 
-                gamePlayer.getPlayer().setHealth(0D);
-                Bukkit.broadcastMessage(gamePlayer.getName() + " 마피아한테 죽었습니다.");
+                if (process.getVote().getResurrection(gamePlayer)) {
+                    Bukkit.broadcastMessage(Message.SYSTEM + "의사의 도움으로 마피아로부터 도망갔습니다!");
+
+                } else if (ability.getAbilityType() == Ability.Type.SOLDIER)
+                {
+                    Bukkit.broadcastMessage(Message.SYSTEM + "군인은 마피아의 공격을 한 번 견뎠습니다.");
+                    if (ability.soldier.values().size() == 2)
+                    {
+                        gamePlayer.getPlayer().setHealth(0D);
+                        Bukkit.broadcastMessage(Message.SYSTEM + "군인이 공격을 2번 맞아 죽었습니다.");
+                    }
+                    ability.setAttack(gamePlayer);
+                }
+
+                    gamePlayer.getPlayer().setHealth(0D);
+                    Bukkit.broadcastMessage(Message.SYSTEM + "§6" + gamePlayer.getName() + " §r는 마피아한테 죽었습니다.");
             }
 
             for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
@@ -522,7 +558,6 @@ public final class GameScheduler implements Runnable {
                 mafiaVoteMax.clear();
             }
 
-            Bukkit.broadcastMessage("end NightTask");
             return new DayTask();
         }
 
@@ -556,69 +591,7 @@ public final class GameScheduler implements Runnable {
         }
     }
 
-    private class NightKillTask implements GameTask {
-
-        NightKillTask() {
-        }
-
-        public GameTask run() {
-
-           /* for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineCitizen()) {
-                Message.sendCitizen(gamePlayer);
-            }
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineDoctor()) {
-                Message.sendDoctor(gamePlayer);
-            }
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePolice()) {
-                Message.sendPolice(gamePlayer);
-            }
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
-                Message.sendMafia(gamePlayer);
-            }
-            for (GamePlayer gamePlayer : process.getPlayerManager().getDeathPlayers()) {
-                Message.sendGhost(gamePlayer);
-            }
-            //task run
-            Collection vote = process.getVote().vote.values();
-            Integer max = (Integer) Collections.max(vote);
-
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
-                if (process.getVote().vote.get(gamePlayer.getName()) == max) {
-                    voteMax.put(gamePlayer, max);
-                }
-            }
-
-            Set<String> user = process.getVote().vote.keySet();
-            Set<GamePlayer> topuser = voteMax.keySet();
-
-            for (GamePlayer gamePlayer : topuser) {
-
-                String playerName = gamePlayer.getName();
-
-                    gamePlayer.getPlayer().setHealth(0D);
-                    Bukkit.broadcastMessage(gamePlayer.getName() + " 마피아한테 죽었습니다.");
-
-            }
-
-            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
-                Player player = gamePlayer.getPlayer();
-
-                Packet titlePacket = Packet.TITLE.compound("§6기나긴 밤이 지나갔습니다", "§7아침이 되었습니다", 5, 60, 10);
-                titlePacket.send(player);
-
-                process.getVote().clearVote(gamePlayer);
-                process.getVote().clearArrest(gamePlayer);
-                process.getVote().clearResurrection();
-            }
-
-            Bukkit.broadcastMessage("end NightKillTask");
-
-            GameProcess process = GameScheduler.this.process;*/
-            // process.getPlugin().processStop();
-
-            return new DayTask();
-        }
-    }
-
 
 }
+
+

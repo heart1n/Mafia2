@@ -33,5 +33,4 @@ public class CommandGameInventory extends CommandComponent {
         return true;
     }
 
-
 }

@@ -102,15 +102,17 @@ public final class GamePlayerManager {
         if (this.getOnlineMafia().size() > 0)
             return;
 
+        process.getChat().clearChat();
         process.getPlugin().getServer().broadcastMessage("시민 승리");
         process.getPlugin().processStop();
         process.getScheduler().remainbar.removeAll();
+
     }
 
     void checkCitizen() {
         if (this.getOnlineCitizen().size() > 0)
             return;
-
+        process.getChat().clearChat();
         process.getPlugin().getServer().broadcastMessage("마피아 승리");
         process.getPlugin().processStop();
         process.getScheduler().remainbar.removeAll();

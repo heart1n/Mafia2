@@ -22,7 +22,7 @@ public class Mafia extends Ability {
 
     public Enum type()
     {
-        return abilityType();
+        return getAbilityType();
     }
 
 }

@@ -9,13 +9,14 @@ public class GameVote {
 
 
     public Map<String, Integer> vote = new HashMap();
+    public Map<GamePlayer, Integer> mafiaVote = new HashMap();
 
     public Map<GamePlayer, Boolean> resurrection = new HashMap();
     public Map<GamePlayer, Boolean> arrest = new HashMap();
     public Map<GamePlayer, Boolean> spy = new HashMap();
     public Map<GamePlayer, Boolean> voteCheckPlayer = new HashMap();
     public Map<GamePlayer, Boolean> abilityCheckPlayer = new HashMap();
-    public Map<GamePlayer, Integer> mafiaVote = new HashMap();
+
 
     private GameProcess process;
 
@@ -33,7 +34,7 @@ public class GameVote {
 
     public GamePlayer removeAbilityCheck(GamePlayer gamePlayer)
     {
-        this.abilityCheckPlayer.remove(gamePlayer);
+        this.abilityCheckPlayer.put(gamePlayer, false);
 
         return gamePlayer;
     }
@@ -118,6 +119,13 @@ public class GameVote {
 
         this.arrest.clear();
         this.arrest.put(gamePlayer, false);
+    }
+
+    public void clear()
+    {
+        clearAbilityCheck();
+        clearResurrection();
+        this.mafiaVote.clear();
     }
 
 
