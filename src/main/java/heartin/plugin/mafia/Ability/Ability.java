@@ -13,7 +13,7 @@ public class Ability {
     private final String[] description;
     private Type type;
 
-    public Map<GamePlayer, Integer> soldier =  new HashMap();
+    public Map<GamePlayer, Boolean> soldier = new HashMap();
 
 
     public Ability(GamePlayer gamePlayer, String abilityName, Type type, String[] decription) {
@@ -36,26 +36,29 @@ public class Ability {
         return abilityName;
     }
 
-    public GamePlayer getAbilityPlayer()
-    {
+    public GamePlayer getAbilityPlayer() {
         return gamePlayer;
     }
 
-    public Enum setAbilityType(GamePlayer gamePlayer, Type type)
-    {
+    public Enum setAbilityType(GamePlayer gamePlayer, Type type) {
         this.gamePlayer = gamePlayer;
         this.type = type;
 
         return type;
     }
 
-    public GamePlayer setAttack(GamePlayer gamePlayer)
-    {
+    public GamePlayer setAttack(GamePlayer gamePlayer) {
 
-        soldier.put(gamePlayer, Integer.valueOf(0));
-        soldier.put(gamePlayer, Integer.valueOf((Integer) soldier.get(gamePlayer)).intValue() + 1);
+        soldier.put(gamePlayer, false);
 
         return gamePlayer;
+    }
+
+    public GamePlayer addAttack(GamePlayer gamePlayer) {
+        soldier.put(gamePlayer, true);
+
+        return gamePlayer;
+
     }
 
 

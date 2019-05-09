@@ -1,7 +1,6 @@
 package heartin.plugin.mafia;
 
 import heartin.plugin.mafia.Ability.*;
-import heartin.plugin.mafia.heartin.plugin.command.CommandGameVote;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
@@ -76,6 +75,9 @@ public final class GamePlayerManager {
     void registerGamePlayer(Player player) {
         GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
 
+
+
+
         if (gamePlayer != null) {
             gamePlayer.setPlayer(player);
         }
@@ -106,14 +108,13 @@ public final class GamePlayerManager {
         process.getPlugin().getServer().broadcastMessage(Message.SYSTEM + "시민 승리");
         process.getPlugin().processStop();
         process.getScheduler().remainbar.removeAll();
-
     }
 
     void checkCitizen() {
         if (this.getOnlineCitizen().size() > 0)
             return;
         process.getChat().clearChat();
-        process.getPlugin().getServer().broadcastMessage (Message.SYSTEM + "마피아 승리");
+        process.getPlugin().getServer().broadcastMessage(Message.SYSTEM + "마피아 승리");
         process.getPlugin().processStop();
         process.getScheduler().remainbar.removeAll();
     }
@@ -138,11 +139,7 @@ public final class GamePlayerManager {
         if (doctor != null)
             onlineDoctor.remove(gamePlayer);
 
-        gamePlayer.getPlayer().sendMessage("앙 죽어띠 - " + onlineDeath.size());
         gamePlayer.setDead();
-
-        gamePlayer.getPlayer().sendMessage("Dead : " + gamePlayer.isDead());
-
         return gamePlayer;
     }
 
@@ -153,6 +150,13 @@ public final class GamePlayerManager {
         // -> 플레이어 직업 호출
     }
 
+    public GamePlayer addMafia(GamePlayer gamePlayer) {
+
+        this.onlineCitizen.remove(gamePlayer);
+        this.onlineMafia.add(gamePlayer);
+
+        return gamePlayer;
+    }
 
     public GamePlayer setMafia(GamePlayer gamePlayer) {
 
@@ -256,7 +260,7 @@ public final class GamePlayerManager {
 
     public GamePlayer setSoldier(GamePlayer gamePlayer) {
 
-        this.playerAbility.put(gamePlayer, new Citizen(gamePlayer));
+        this.playerAbility.put(gamePlayer, new Soldier(gamePlayer));
         this.onlineSoldier.add(gamePlayer);
         // process.getScoreboard().setSoldier(gamePlayer.getName());
 

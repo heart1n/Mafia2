@@ -17,8 +17,8 @@ public class GameChat {
         this.process = process;
     }
 
-    public GamePlayer changePlayerChat(Player player) {
-        GamePlayer gamePlayer = process.getPlayerManager().getGamePlayer(player);
+    public GamePlayer changePlayerChat(GamePlayer gamePlayer) {
+
         ChatMode mode = this.playerChat.get(gamePlayer);
 
         if (mafiaChat.get(gamePlayer)) {
@@ -28,9 +28,8 @@ public class GameChat {
 
             gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "§e채팅모드 §c: §r§l" + mode);
         } else {
-            player.sendMessage(Message.SYSTEM + "마피아만 사용할 수 있습니다.");
+            gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "마피아만 사용할 수 있습니다.");
         }
-
 
         return gamePlayer;
     }

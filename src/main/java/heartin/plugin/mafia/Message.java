@@ -55,7 +55,7 @@ public class Message {
         Player player = gamePlayer.getPlayer();
 
         TextComponentBuilder builder = TextComponent.builder();
-        builder.object().text("§6당신의 §r직업 §r: §b유령");
+        builder.object().text("§6당신의 §r직업 §r: §7유령");
 
         Packet.INFO.chat(builder.build(), ChatType.GAME_INFO).send((Player) player);
     }

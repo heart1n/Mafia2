@@ -1,16 +1,12 @@
 package heartin.plugin.mafia;
 
 import heartin.plugin.mafia.Ability.Ability;
-import heartin.plugin.mafia.Ability.Citizen;
-import heartin.plugin.mafia.Ability.Soldier;
-import heartin.plugin.mafia.heartin.plugin.command.CommandGameVote;
 import nemo.mc.packet.Packet;
 import org.bukkit.Bukkit;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -58,7 +54,6 @@ public final class GameScheduler implements Runnable {
                     Player player = mafia.getPlayer();
                     GamePlayer gamePlayer = (GamePlayer) process.getPlayerManager().getGamePlayer(player);
                     process.getPlayerManager().setMafia(gamePlayer);
-                    process.getChat().setMafiachat(gamePlayer);
                 }
 
                 if (doctor.isOnline()) {
@@ -73,15 +68,13 @@ public final class GameScheduler implements Runnable {
                     process.getPlayerManager().setPolice(gamePlayer);
                 }
 
-                if (spy.isOnline())
-                {
+                if (spy.isOnline()) {
                     Player player = spy.getPlayer();
                     GamePlayer gamePlayer = (GamePlayer) process.getPlayerManager().getGamePlayer(player);
                     process.getPlayerManager().setSpy(gamePlayer);
                 }
 
-                if(soldier.isOnline())
-                {
+                if (soldier.isOnline()) {
                     Player player = soldier.getPlayer();
                     GamePlayer gamePlayer = (GamePlayer) process.getPlayerManager().getGamePlayer(player);
                     process.getPlayerManager().setSoldier(gamePlayer);
@@ -100,14 +93,24 @@ public final class GameScheduler implements Runnable {
                 Player player = gamePlayer.getPlayer();
 
                 process.getChat().setGeneralChat(player);
-                process.getScoreboard().registerPlayer(gamePlayer);
+               // process.getScoreboard().registerPlayer(gamePlayer);
                 process.getVote().clear();
 
                 player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 10), true);
                 Packet titlePacket = Packet.TITLE.compound("§6마피아 게임을 시작합니다", "§7직업을 확인해주세요.", 5, 60, 10);
                 titlePacket.send(player);
 
-                player.sendMessage("잠시 후 게임이 시작됩니다.");
+
+                player.sendMessage(Message.SYSTEM + "잠시 후 게임이 시작됩니다.");
+            }
+
+            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
+                process.getChat().setMafiachat(gamePlayer);
+            }
+
+            for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSoldier()) {
+                Ability ability = process.getPlayerManager().getAbility(gamePlayer);
+                ability.setAttack(gamePlayer);
             }
 
             return new WaitTask();
@@ -140,12 +143,10 @@ public final class GameScheduler implements Runnable {
                 for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
                     Message.sendMafia(gamePlayer);
                 }
-                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy())
-                {
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy()) {
                     Message.sendSpy(gamePlayer);
                 }
-                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier())
-                {
+                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier()) {
                     Message.sendSoldier(gameplayer);
                 }
                 for (GamePlayer gamePlayer : process.getPlayerManager().getDeathPlayers()) {
@@ -172,9 +173,11 @@ public final class GameScheduler implements Runnable {
         private void updateTime() {
             int remainTicks = this.remainTicks;
 
-            if (remainTicks > 100) {
+            if (remainTicks >= 100) {
                 if (remainTicks % 2 == 0) {
                     int seconds = remainTicks / 20;
+
+
 
                     for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
                         Player player = gamePlayer.getPlayer();
@@ -184,7 +187,7 @@ public final class GameScheduler implements Runnable {
 
                     remainbar.setColor(BarColor.BLUE);
                     remainbar.setTitle(String.format("§d남은시간§r§l %02d:%02d§r ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
-                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format("§d§l남은시간 §f§l%02d:%02d§r  ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                   // GameScheduler.this.process.getScoreboard().setDisplayName(String.format("§d§l남은시간 §f§l%02d:%02d§r  ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                 }
             } else {
                 remainTicks += 19;
@@ -193,8 +196,14 @@ public final class GameScheduler implements Runnable {
                     char color = remainTicks / 5 % 2 == 0 ? 'f' : 'c';
                     int seconds = remainTicks / 20;
 
+                    if ( seconds / 5.0 < 0.6){
+                        remainbar.setColor(BarColor.YELLOW);
+                    }else if ( seconds / 5.0 < 0.3){
+                        remainbar.setColor(BarColor.RED);
+                    }
+                    remainbar.setProgress(seconds / 5.0);
                     remainbar.setTitle(String.format("§d남은시간 §%c§l%02d:%02d§r ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
-                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§l남은시간 §%c§l%02d:%02d§r  ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                 //   GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§l남은시간 §%c§l%02d:%02d§r  ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                 }
             }
         }
@@ -226,12 +235,10 @@ public final class GameScheduler implements Runnable {
                 for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
                     Message.sendMafia(gamePlayer);
                 }
-                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy())
-                {
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy()) {
                     Message.sendSpy(gamePlayer);
                 }
-                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier())
-                {
+                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier()) {
                     Message.sendSoldier(gameplayer);
                 }
                 for (GamePlayer gamePlayer : process.getPlayerManager().getDeathPlayers()) {
@@ -271,7 +278,10 @@ public final class GameScheduler implements Runnable {
 
                     remainbar.setColor(BarColor.PINK);
                     remainbar.setTitle(String.format("§d남은시간 §r§l%02d:%02d§r ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
-                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format("§d§l남은시간 §f§l%02d:%02d§r  ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+
+                    remainbar.setProgress(seconds / 120.0);
+
+                //    GameScheduler.this.process.getScoreboard().setDisplayName(String.format("§d§l남은시간 §f§l%02d:%02d§r  ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                 }
             } else {
                 remainTicks += 19;
@@ -282,7 +292,10 @@ public final class GameScheduler implements Runnable {
                     int seconds = remainTicks / 20;
 
                     remainbar.setTitle(String.format("§d남은시간 §%c§l%02d:%02d§r ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
-                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§l남은시간 §%c§l%02d:%02d§r  ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+
+
+                    remainbar.setProgress(seconds / 120.0);
+                   // GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§l남은시간 §%c§l%02d:%02d§r  ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                 }
             }
         }
@@ -311,12 +324,10 @@ public final class GameScheduler implements Runnable {
                 for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
                     Message.sendMafia(gamePlayer);
                 }
-                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy())
-                {
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy()) {
                     Message.sendSpy(gamePlayer);
                 }
-                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier())
-                {
+                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier()) {
                     Message.sendSoldier(gameplayer);
                 }
                 for (GamePlayer gamePlayer : process.getPlayerManager().getDeathPlayers()) {
@@ -339,11 +350,11 @@ public final class GameScheduler implements Runnable {
 
             Bukkit.broadcastMessage("§6─────────── §b투표 결과 §6─────────────");
             for (String str : user) {
-                Bukkit.broadcastMessage(str + " : " + process.getVote().vote.get(str) + " 표");
+                Bukkit.broadcastMessage("§b" + str + "§7 : §6" + process.getVote().vote.get(str) + " §7표");
             }
 
             if (voteMax.size() >= 2) {
-                Bukkit.broadcastMessage("같은 표가 있으므로 투표를 종료합니다.");
+                Bukkit.broadcastMessage("\n같은 표가 있으므로 §6투표§r를 §c종료§r합니다.");
 
                 for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
                     Player player = gamePlayer.getPlayer();
@@ -382,10 +393,9 @@ public final class GameScheduler implements Runnable {
             }
             for (GamePlayer str : topuser) {
                 Bukkit.broadcastMessage("§6─────────── §b최다 득표 §6─────────────");
-                Bukkit.broadcastMessage(str.getName() + " : " + voteMax.get(str) + " 표");
+                Bukkit.broadcastMessage("§b" + str.getName() + "§7 : §6" + voteMax.get(str) + " §7표");
 
                 str.getPlayer().setHealth(0D);
-                Bukkit.broadcastMessage(str.getName() + "사망");
             }
 
             for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
@@ -440,8 +450,9 @@ public final class GameScheduler implements Runnable {
                         remainbar.addPlayer(player);
                     }
 
+                    remainbar.setProgress(seconds / 60.0);
                     remainbar.setTitle(String.format("§d투표시간§r§l %02d:%02d§r ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
-                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§l투표시간 §f§l%02d:%02d§r  ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                 //   GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§l투표시간 §f§l%02d:%02d§r  ", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                 }
             } else {
                 remainTicks += 19;
@@ -450,8 +461,10 @@ public final class GameScheduler implements Runnable {
                     char color = remainTicks / 5 % 2 == 0 ? 'f' : 'c';
                     int seconds = remainTicks / 20;
 
+
+                    remainbar.setProgress(seconds / 60.0);
                     remainbar.setTitle(String.format("§d투표시간 §%c§l%02d:%02d§r ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
-                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§l투표시간 §%c§l%02d:%02d§r  ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                 //   GameScheduler.this.process.getScoreboard().setDisplayName(String.format(" §d§l투표시간 §%c§l%02d:%02d§r  ", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                 }
             }
         }
@@ -481,12 +494,10 @@ public final class GameScheduler implements Runnable {
                 for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineMafia()) {
                     Message.sendMafia(gamePlayer);
                 }
-                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy())
-                {
+                for (GamePlayer gamePlayer : process.getPlayerManager().getOnlineSpy()) {
                     Message.sendSpy(gamePlayer);
                 }
-                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier())
-                {
+                for (GamePlayer gameplayer : process.getPlayerManager().getOnlineSoldier()) {
                     Message.sendSoldier(gameplayer);
                 }
                 for (GamePlayer gamePlayer : process.getPlayerManager().getDeathPlayers()) {
@@ -495,15 +506,6 @@ public final class GameScheduler implements Runnable {
 
                 return this;
             }
-
-            // Collection<Integer> vote = process.getVote().vote.values();
-            //  Integer max = (Integer) Collections.max(vote);
-
-            //  for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
-            //     if (process.getVote().vote.get(gamePlayer.getName()) == max) {
-            //         voteMax.put(gamePlayer, max);
-            //      }
-            //   }
             Set<String> user = process.getVote().vote.keySet();
             Set<GamePlayer> topuser = voteMax.keySet();
 
@@ -521,28 +523,30 @@ public final class GameScheduler implements Runnable {
             }
             Set<GamePlayer> top = mafiaVoteMax.keySet();
 
-            // gamePlayer 가 의사가 선택한 사람이라면 -> new task
-
             for (GamePlayer gamePlayer : top) {
 
                 Ability ability = process.getPlayerManager().getAbility(gamePlayer);
 
+
+                if (ability.getAbilityType() == Ability.Type.SOLDIER) {
+                    if (!ability.soldier.get(gamePlayer)) {
+                        Bukkit.broadcastMessage(Message.SYSTEM + "군인은 마피아의 공격을 한 번 견뎠습니다.");
+                        ability.addAttack(gamePlayer);
+                        continue;
+                    } else {
+                        gamePlayer.getPlayer().setHealth(0D);
+                        Bukkit.broadcastMessage(Message.SYSTEM + "군인이 공격을 2번 맞아 죽었습니다.");
+                        continue;
+                    }
+                }
+
                 if (process.getVote().getResurrection(gamePlayer)) {
                     Bukkit.broadcastMessage(Message.SYSTEM + "의사의 도움으로 마피아로부터 도망갔습니다!");
 
-                } else if (ability.getAbilityType() == Ability.Type.SOLDIER)
-                {
-                    Bukkit.broadcastMessage(Message.SYSTEM + "군인은 마피아의 공격을 한 번 견뎠습니다.");
-                    if (ability.soldier.values().size() == 2)
-                    {
-                        gamePlayer.getPlayer().setHealth(0D);
-                        Bukkit.broadcastMessage(Message.SYSTEM + "군인이 공격을 2번 맞아 죽었습니다.");
-                    }
-                    ability.setAttack(gamePlayer);
-                }
-
+                } else {
                     gamePlayer.getPlayer().setHealth(0D);
                     Bukkit.broadcastMessage(Message.SYSTEM + "§6" + gamePlayer.getName() + " §r는 마피아한테 죽었습니다.");
+                }
             }
 
             for (GamePlayer gamePlayer : process.getPlayerManager().getOnlinePlayers()) {
@@ -558,7 +562,7 @@ public final class GameScheduler implements Runnable {
                 mafiaVoteMax.clear();
             }
 
-            return new DayTask();
+            return new WaitTask();
         }
 
         private void updateTime() {
@@ -574,8 +578,9 @@ public final class GameScheduler implements Runnable {
                         remainbar.addPlayer(player);
                     }
 
+                    remainbar.setProgress(seconds / 60.0);
                     remainbar.setTitle(String.format("§d마피아 투표§r§l %02d:%02d§r", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
-                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format("§d§l마피아 투표 §f§l%02d:%02d§r", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                  //  GameScheduler.this.process.getScoreboard().setDisplayName(String.format("§d§l마피아 투표 §f§l%02d:%02d§r", new Object[]{Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                 }
             } else {
                 remainTicks += 19;
@@ -584,14 +589,13 @@ public final class GameScheduler implements Runnable {
                     char color = remainTicks / 5 % 2 == 0 ? 'f' : 'c';
                     int seconds = remainTicks / 20;
 
+                    remainbar.setProgress(seconds / 60.0);
                     remainbar.setTitle(String.format("§d마피아 투표 §%c§l%02d:%02d§r", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
-                    GameScheduler.this.process.getScoreboard().setDisplayName(String.format("§d§l마피아 투표 §%c§l%02d:%02d§r", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
+                  //  GameScheduler.this.process.getScoreboard().setDisplayName(String.format("§d§l마피아 투표 §%c§l%02d:%02d§r", new Object[]{Character.valueOf(color), Integer.valueOf(seconds / 60), Integer.valueOf(seconds % 60)}));
                 }
             }
         }
     }
-
-
 }
 
 
