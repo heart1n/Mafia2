@@ -58,7 +58,18 @@ public class Ability {
         soldier.put(gamePlayer, true);
 
         return gamePlayer;
+    }
 
+    public GamePlayer getMafiaPlayer(GamePlayer gamePlayer)
+    {
+        this.type = Type.MAFIA;
+
+        if (this.type == Type.MAFIA)
+        {
+            gamePlayer.getPlayer().sendMessage("");
+        }
+
+        return gamePlayer;
     }
 
 
@@ -68,6 +79,7 @@ public class Ability {
         POLICE,
         SPY,
         SOLDIER,
+        POLITICIAN,
         MEDIUM,
         CITIZEN;
     }

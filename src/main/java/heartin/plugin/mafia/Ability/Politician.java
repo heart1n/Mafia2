@@ -1,16 +1,15 @@
 package heartin.plugin.mafia.Ability;
 
 import heartin.plugin.mafia.GamePlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.inventory.Inventory;
 
-public class Mafia extends Ability {
+public class Politician extends Ability{
+
 
     private static String[] description = {"당신은 마피아 입니다"};
 
-    public Mafia(GamePlayer gamePlayer) {
+    public Politician(GamePlayer gamePlayer) {
 
-        super(gamePlayer, "마피아", Type.MAFIA, description);
+        super(gamePlayer, "정치인", Type.POLITICIAN, description);
     }
 
 
@@ -24,5 +23,4 @@ public class Mafia extends Ability {
     {
         return getAbilityType();
     }
-
 }

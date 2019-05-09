@@ -39,9 +39,9 @@ public class GameInventory {
         if (ability.getAbilityType() == Ability.Type.MAFIA) {
             inventory.setItem(15, createItem("§b직업능력", Material.DIAMOND_SWORD));
         } else if (ability.getAbilityType() == Ability.Type.DOCTOR) {
-            inventory.setItem(15, createItem("§e직업능력", Material.BED));
+            inventory.setItem(15, createItem("§e직업능력", Material.EMERALD));
         } else if (ability.getAbilityType() == Ability.Type.POLICE) {
-            inventory.setItem(15, createItem("§d직업능력", Material.STICK));
+            inventory.setItem(15, createItem("§d직업능력", Material.SUGAR));
         } else if (ability.getAbilityType() == Ability.Type.SPY) {
             inventory.setItem(15, createItem("§4직업능력", Material.DIAMOND));
         }

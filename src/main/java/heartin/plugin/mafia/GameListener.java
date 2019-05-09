@@ -1,25 +1,19 @@
 package heartin.plugin.mafia;
 
 import heartin.plugin.mafia.Ability.Ability;
-import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class GameListener implements Listener {
 
@@ -50,7 +44,7 @@ public class GameListener implements Listener {
 
         process.getPlayerManager().setDeath(player);
 
-        player.sendMessage(Message.SYSTEM  + "당신은 죽었습니다.");
+        player.sendMessage(Message.SYSTEM + "당신은 죽었습니다.");
 
         process.getPlayerManager().checkFinish();
         process.getPlayerManager().checkCitizen();
@@ -101,13 +95,24 @@ public class GameListener implements Listener {
                         String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
                         Player p = Bukkit.getPlayer(playerName);
                         GamePlayer target = process.getPlayerManager().getGamePlayer(p);
-                        if (!target.isDead()) {
-                            process.getVote().vote.put(playerName, Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + 1);
-                            process.getVote().removeVote(gamePlayer);
-                            player.sendMessage(Message.SYSTEM + "§b" + playerName + "§r에게 투표를 합니다.");
-                            Bukkit.broadcastMessage(playerName + ": " + Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + "표");
-                        } else {
+                        Ability ability = process.getPlayerManager().getAbility(gamePlayer);
+
+                        if (target.isDead()) {
                             player.sendMessage(Message.SYSTEM + "죽은 플레이어 입니다.");
+                        } else {
+
+                            if (ability.getAbilityType() == Ability.Type.POLITICIAN) {
+
+                                process.getVote().vote.put(playerName, Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + 2);
+                                process.getVote().removeVote(gamePlayer);
+                                player.sendMessage(Message.SYSTEM + "§b" + playerName + "§r에게 투표를 합니다.");
+                                Bukkit.broadcastMessage(Message.SYSTEM + "§b" + playerName + "§7: §6" + Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + " §7표");
+                            } else {
+                                process.getVote().vote.put(playerName, Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + 1);
+                                process.getVote().removeVote(gamePlayer);
+                                player.sendMessage(Message.SYSTEM + "§b" + playerName + "§r에게 투표를 합니다.");
+                                Bukkit.broadcastMessage(Message.SYSTEM + "§b" + playerName + "§7: §6" + Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + " §7표");
+                            }
                         }
                     } else {
                         player.sendMessage(Message.SYSTEM + "이미 투표를 하셨습니다.");
@@ -133,22 +138,21 @@ public class GameListener implements Listener {
                         Player p = Bukkit.getPlayer(playerName);
                         GamePlayer target = process.getPlayerManager().getGamePlayer(p);
 
-                        if (!target.isDead()) {
+                        if (target.isDead()) {
+                            player.sendMessage(Message.SYSTEM + "죽은 플레이어 입니다.");
+                        } else {
+
                             process.getVote().mafiaVote.put(target, Integer.valueOf((Integer) process.getVote().mafiaVote.get(target)).intValue() + 1);
                             player.sendMessage(Message.SYSTEM + target.getName() + " 에게 §c투표를 합니다.");
-                        } else {
-                            player.sendMessage(Message.SYSTEM + "죽은 플레이어 입니다.");
+
                         }
                         process.getVote().removeAbilityCheck(gamePlayer);
                     } else {
                         player.sendMessage(Message.SYSTEM + "이미 능력을 사용했습니다.");
                     }
-                }
-                catch (NullPointerException e)
-                {
+                } catch (NullPointerException e) {
                     player.sendMessage(Message.SYSTEM + "지금은 사용할 수 없습니다.");
                 }
-
 
 
             }
@@ -166,25 +170,32 @@ public class GameListener implements Listener {
                 Player p = Bukkit.getPlayer(playerName);
                 GamePlayer mafia = process.getPlayerManager().getGamePlayer(p);
 
-                if (process.getVote().getAbilityCheck(gamePlayer)) {
-                    Ability ability = process.getPlayerManager().getAbility(mafia);
-                    if (!mafia.isDead()) {
-                        if (ability.getAbilityType() == Ability.Type.MAFIA) {
-                            mafia.getPlayer().sendMessage(Message.SYSTEM + "§4스파이§r가 §c마피아§r에게 접선했습니다.");
-                            player.sendMessage(Message.SYSTEM + "§4스파이§r가 §c마피아§r에게 접선했습니다.");
-
-                            process.getPlayerManager().addMafia(gamePlayer);
-                            process.getChat().setMafiachat(gamePlayer);
+                try {
+                    if (process.getVote().getAbilityCheck(gamePlayer)) {
+                        Ability ability = process.getPlayerManager().getAbility(mafia);
+                        if (mafia.isDead()) {
+                            player.sendMessage(Message.SYSTEM + "죽은 플레이어 입니다.");
                         } else {
-                            player.sendMessage(mafia.getName() + "의 직업은" + ability.getAbilityName() + " 입니다.");
+                            if (ability.getAbilityType() == Ability.Type.MAFIA) {
+                                mafia.getPlayer().sendMessage(Message.SYSTEM + "§4스파이§r가 §c마피아§r에게 접선했습니다.");
+                                player.sendMessage(Message.SYSTEM + "§4스파이§r가 §c마피아§r에게 접선했습니다.");
+
+                                process.getPlayerManager().addMafia(gamePlayer);
+                                process.getChat().setMafiachat(gamePlayer);
+                            } else {
+                                player.sendMessage(Message.SYSTEM  + "§b" +  mafia.getName() + " §r의 직업은§c " + ability.getAbilityName() + " §r입니다.");
+                            }
+
+
                         }
+                        process.getVote().removeAbilityCheck(gamePlayer);
                     } else {
-                        player.sendMessage(Message.SYSTEM + "죽은 플레이어 입니다.");
+                        player.sendMessage(Message.SYSTEM + "이미 능력을 사용했습니다.");
                     }
-                    process.getVote().removeAbilityCheck(gamePlayer);
-                } else {
-                    player.sendMessage(Message.SYSTEM + "이미 능력을 사용했습니다.");
+                } catch (NullPointerException e) {
+                    player.sendMessage(Message.SYSTEM + "지금은 사용할 수 없습니다.");
                 }
+
             }
         }
 
@@ -201,13 +212,14 @@ public class GameListener implements Listener {
                         String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
                         Player p = Bukkit.getPlayer(playerName);
                         GamePlayer target = process.getPlayerManager().getGamePlayer(p);
-                        if (!target.isDead()) {
+                        if (target.isDead()) {
+                            player.sendMessage(Message.SYSTEM + "죽은 플레이어 입니다.");
+                        } else {
+
                             process.getVote().setResurrection(target);
 
                             player.sendMessage(Message.SYSTEM + "§b" + playerName + "를 살립니다.");
                             process.getVote().removeAbilityCheck(gamePlayer);
-                        } else {
-                            player.sendMessage(Message.SYSTEM + "죽은 플레이어 입니다.");
                         }
                     }
                 } catch (NullPointerException e) {
@@ -229,7 +241,10 @@ public class GameListener implements Listener {
                     if (process.getVote().getAbilityCheck(gamePlayer)) {
                         Ability ability = process.getPlayerManager().getAbility(target);
 
-                        if (!target.isDead()) {
+                        if (target.isDead()) {
+                            player.sendMessage(Message.SYSTEM + "죽은 플레이어 입니다.");
+                        } else {
+
                             if (ability.getAbilityType() == Ability.Type.MAFIA) {
                                 player.sendMessage(Message.SYSTEM + "§b" + target.getName() + " 는 마피아 입니다.");
 
@@ -239,8 +254,7 @@ public class GameListener implements Listener {
                             }
                             process.getVote().removeAbilityCheck(gamePlayer);
                             process.getVote().clearArrest(gamePlayer);
-                        } else {
-                            player.sendMessage(Message.SYSTEM + "죽은 플레이어 입니다.");
+
                         }
                     } else {
                         player.sendMessage(Message.SYSTEM + "이미 능력을 사용했습니다.");
@@ -266,14 +280,18 @@ public class GameListener implements Listener {
         if (mode == GameChat.ChatMode.GENERAL) {
             for (GamePlayer onlinePlayer : process.getPlayerManager().getOnlinePlayers())
                 onlinePlayer.getPlayer().sendMessage(gamePlayer.getName() + " §7: §e" + event.getMessage());
+
         } else if (mode == GameChat.ChatMode.MAFIA) {
             for (GamePlayer onlinePlayer : process.getPlayerManager().getOnlineMafia())
                 onlinePlayer.getPlayer().sendMessage(gamePlayer.getName() + " §7: §c" + event.getMessage());
+            for (GamePlayer deathPlayer : process.getPlayerManager().getDeathPlayers())
+                deathPlayer.getPlayer().sendMessage(gamePlayer.getName() + " §7: §c" + event.getMessage());
         } else if (mode == GameChat.ChatMode.DEATH) {
             for (GamePlayer onlinePlayer : process.getPlayerManager().getDeathPlayers())
                 onlinePlayer.getPlayer().sendMessage(gamePlayer.getName() + " §7: §7" + event.getMessage());
         }
     }
+
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         ItemStack item = event.getItem();

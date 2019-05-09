@@ -1,6 +1,7 @@
 package heartin.plugin.mafia;
 
 import heartin.plugin.mafia.Ability.Ability;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;

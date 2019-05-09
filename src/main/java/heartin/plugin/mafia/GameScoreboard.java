@@ -67,7 +67,6 @@ final class GameScoreboard {
         if (onlineGamePlayers.size() > 0)
         {
             Packet packet = Packet.SCOREBAORD.scoreboardDisplayName("MafiaGame", displayName);
-
             for (GamePlayer gamePlayer : onlineGamePlayers)
                 packet.send(gamePlayer.getPlayer());
         }

@@ -1,6 +1,8 @@
 package heartin.plugin.mafia;
 
 import heartin.plugin.mafia.Ability.*;
+import nemo.mc.packet.Packet;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
@@ -19,6 +21,7 @@ public final class GamePlayerManager {
     private final Set<GamePlayer> onlineMedium;
     private final Set<GamePlayer> onlineSoldier;
     private final Set<GamePlayer> onlineSpy;
+    private final Set<GamePlayer> onlinePolitician;
     private final Set<GamePlayer> onlineDeath;
     private Set<GamePlayer> unmodifiableMafia;
     private Set<GamePlayer> unmodifiableDoctor;
@@ -27,6 +30,7 @@ public final class GamePlayerManager {
     private Set<GamePlayer> unmodifiableSpy;
     private Set<GamePlayer> unmodifiableSoldier;
     private Set<GamePlayer> unmodifiableMedium;
+    private Set<GamePlayer> unmodifiablePolitician;
     private Set<GamePlayer> unmodifiableDeath;
     private Collection<GamePlayer> unmodifiablePlayers;
     private Collection<GamePlayer> unmodifiableOnlinePlayers;
@@ -45,9 +49,10 @@ public final class GamePlayerManager {
         for (Player player : players) {
             GameMode mode = player.getGameMode();
 
-          /* if ((mode == GameMode.CREATIVE) || (mode == GameMode.SPECTATOR)) {
+          if (mode == GameMode.SPECTATOR)
+          {
                 continue;
-            } */
+            }
             GamePlayer gamePlayer = new GamePlayer(this, player);
 
             playersByUniqueId.put(gamePlayer.getUniqueId(), gamePlayer);
@@ -69,14 +74,12 @@ public final class GamePlayerManager {
         this.onlineSoldier = new HashSet(size);
         this.onlineSpy = new HashSet(size);
         this.onlineDeath = new HashSet(size);
+        this.onlinePolitician = new HashSet(size);
 
     }
 
     void registerGamePlayer(Player player) {
         GamePlayer gamePlayer = (GamePlayer) this.playersByUniqueId.get(player.getUniqueId());
-
-
-
 
         if (gamePlayer != null) {
             gamePlayer.setPlayer(player);
@@ -107,7 +110,7 @@ public final class GamePlayerManager {
         process.getChat().clearChat();
         process.getPlugin().getServer().broadcastMessage(Message.SYSTEM + "시민 승리");
         process.getPlugin().processStop();
-        process.getScheduler().remainbar.removeAll();
+        process.unregister();
     }
 
     void checkCitizen() {
@@ -116,7 +119,9 @@ public final class GamePlayerManager {
         process.getChat().clearChat();
         process.getPlugin().getServer().broadcastMessage(Message.SYSTEM + "마피아 승리");
         process.getPlugin().processStop();
-        process.getScheduler().remainbar.removeAll();
+        process.unregister();
+
+
     }
 
     public GamePlayer setDeath(Player player) {
@@ -124,11 +129,16 @@ public final class GamePlayerManager {
 
         this.onlineDeath.add(gamePlayer);
         GameChat.playerChat.put(gamePlayer, GameChat.ChatMode.DEATH);
+        gamePlayer.getPlayer().setGameMode(GameMode.SPECTATOR);
+        process.getChat().setMafiachat(gamePlayer);
 
         Set mafia = this.unmodifiableMafia;
         Set citizen = this.unmodifiableCitizen;
         Set police = this.unmodifiablePolice;
         Set doctor = this.unmodifiableDoctor;
+        Set spy = this.unmodifiableSpy;
+        Set soldier = this.unmodifiableSoldier;
+        Set politician = this.unmodifiablePolitician;
 
         if (mafia != null)
             onlineMafia.remove(gamePlayer);
@@ -138,6 +148,12 @@ public final class GamePlayerManager {
             onlinePolice.remove(gamePlayer);
         if (doctor != null)
             onlineDoctor.remove(gamePlayer);
+        if(soldier != null)
+            onlineSoldier.remove(gamePlayer);
+        if(spy != null)
+            onlineSpy.remove(gamePlayer);
+        if(politician != null)
+            onlinePolitician.remove(gamePlayer);
 
         gamePlayer.setDead();
         return gamePlayer;
@@ -169,6 +185,7 @@ public final class GamePlayerManager {
 
         return gamePlayer;
     }
+
 
     public Set<GamePlayer> getOnlineMafia() {
 
@@ -294,6 +311,25 @@ public final class GamePlayerManager {
             this.unmodifiableMedium = (medium = Collections.unmodifiableSet(this.onlineMedium));
         }
         return medium;
+    }
+
+    public GamePlayer setPolitician(GamePlayer gamePlayer)
+    {
+        this.playerAbility.put(gamePlayer, new Politician(gamePlayer));
+        this.onlinePolitician.add(gamePlayer);
+
+        return gamePlayer;
+    }
+
+    public Set<GamePlayer> getOnlinePolitician()
+    {
+        Set politician = this.unmodifiablePolitician;
+
+        if (politician == null)
+        {
+            this.unmodifiablePolitician = (politician = Collections.unmodifiableSet(this.onlinePolitician));
+        }
+        return politician;
     }
 
     public GamePlayer getGamePlayer(Player player) {

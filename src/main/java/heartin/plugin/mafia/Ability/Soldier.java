@@ -15,7 +15,7 @@ public class Soldier extends Ability{
 
     public Soldier(GamePlayer gamePlayer)
     {
-        super(gamePlayer, "Soldier", Type.SOLDIER, description);
+        super(gamePlayer, "군인", Type.SOLDIER, description);
     }
 
     public String[] getDescription(String[] description)

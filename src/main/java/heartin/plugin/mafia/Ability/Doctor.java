@@ -8,7 +8,7 @@ public class Doctor extends Ability {
 
     public Doctor(GamePlayer gamePlayer) {
 
-        super(gamePlayer, "Doctor", Type.DOCTOR, description);
+        super(gamePlayer, "의사", Type.DOCTOR, description);
     }
 
     public String[] getDescription(String[] description)

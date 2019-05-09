@@ -12,7 +12,7 @@ public class Citizen extends Ability {
     private static String[] description = {""};
 
     public Citizen(GamePlayer gamePlayer) {
-        super(gamePlayer, "Citizen", Type.CITIZEN,  description);
+        super(gamePlayer, "시민", Type.CITIZEN,  description);
     }
 
     public String[] getDescription(String[] description) {

@@ -73,6 +73,7 @@ public final class GameProcess {
 
         GameScheduler.remainbar.removeAll();
         GamePlayerManager playerManager = this.playerManager;
+
     }
 }
 

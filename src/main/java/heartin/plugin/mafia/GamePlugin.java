@@ -21,7 +21,7 @@ public class GamePlugin extends JavaPlugin {
     }
 
     private void setupCommand() {
-        new CommandManager().addHelp("help").addComponent("start", new CommandGameStart()).addComponent("stop", new CommandGameStop()).addComponent("inventory", new CommandGameInventory()).register(getCommand("game"));
+        new CommandManager().addHelp("help").addComponent("start", new CommandGameStart()).addComponent("stop", new CommandGameStop()).addComponent("inventory", new CommandGameInventory()).addComponent("give", new CommandGameGive()).register(getCommand("game"));
     }
 
     public boolean processStart() {
