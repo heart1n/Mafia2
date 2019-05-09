@@ -83,6 +83,8 @@ public class GameListener implements Listener {
                     process.getInventory().showDoctorInventory(gamePlayer);
                 } else if (itemStack.getItemMeta().getDisplayName().equalsIgnoreCase("§d직업능력")) {
                     process.getInventory().showPoliceInventory(gamePlayer);
+                } else if (itemStack.getItemMeta().getDisplayName().equalsIgnoreCase("§4직업능력")) {
+                    process.getInventory().showSpyInventory(gamePlayer);
                 }
             }
             // Vote inventory
@@ -98,7 +100,7 @@ public class GameListener implements Listener {
 
                         process.getVote().vote.put(playerName, Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + 1);
                         process.getVote().removeVote(gamePlayer);
-                        player.sendMessage(Message.SYSTEM + "§b" +playerName + "§r에게 투표를 합니다.");
+                        player.sendMessage(Message.SYSTEM + "§b" + playerName + "§r에게 투표를 합니다.");
                         Bukkit.broadcastMessage(playerName + ": " + Integer.valueOf((Integer) process.getVote().vote.get(playerName)).intValue() + "표");
                     } else {
                         player.sendMessage(Message.SYSTEM + "이미 투표를 하셨습니다.");
@@ -118,8 +120,7 @@ public class GameListener implements Listener {
                 if (itemStack.getItemMeta() == null) {
                     return;
                 }
-                if (process.getVote().getAbilityCheck(gamePlayer))
-                {
+                if (process.getVote().getAbilityCheck(gamePlayer)) {
                     String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
                     Player displayPlayer = Bukkit.getPlayer(playerName);
                     GamePlayer killed = process.getPlayerManager().getGamePlayer(displayPlayer);
@@ -130,9 +131,7 @@ public class GameListener implements Listener {
                     Bukkit.broadcastMessage(killed.getName() + Integer.valueOf((Integer) process.getVote().mafiaVote.get(killed)).intValue() + "표");
 
                     process.getVote().removeAbilityCheck(gamePlayer);
-                }
-                else
-                {
+                } else {
                     player.sendMessage(Message.SYSTEM + "이미 능력을 사용했습니다.");
                 }
 
@@ -164,8 +163,7 @@ public class GameListener implements Listener {
                         gamePlayer.getPlayer().sendMessage(mafia.getName() + " 지목한 사람의 직업은 " + ability.getAbilityName() + " 입니다.");
                     }
                     process.getVote().removeAbilityCheck(gamePlayer);
-                }else
-                {
+                } else {
                     gamePlayer.getPlayer().sendMessage("이미 능력을 사용했습니다.");
                 }
             }
@@ -179,10 +177,8 @@ public class GameListener implements Listener {
                 if (itemStack.getItemMeta() == null) {
                     return;
                 }
-                try
-                {
-                    if (process.getVote().getAbilityCheck(gamePlayer))
-                    {
+                try {
+                    if (process.getVote().getAbilityCheck(gamePlayer)) {
                         String playerName = event.getCurrentItem().getItemMeta().getDisplayName();
                         Player displayPlayer = Bukkit.getPlayer(playerName);
                         GamePlayer resurrectionPlayer = process.getPlayerManager().getGamePlayer(displayPlayer);
@@ -192,10 +188,8 @@ public class GameListener implements Listener {
                         player.sendMessage(Message.SYSTEM + "§b" + playerName + "를 살립니다.");
                         process.getVote().removeAbilityCheck(gamePlayer);
                     }
-                }
-                catch (NullPointerException e)
-                {
-                    player.sendMessage(Message.SYSTEM  + "이미 능력을 사용했습니다.");
+                } catch (NullPointerException e) {
+                    player.sendMessage(Message.SYSTEM + "이미 능력을 사용했습니다.");
                 }
             }
         }

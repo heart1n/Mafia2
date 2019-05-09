@@ -42,6 +42,8 @@ public class GameInventory {
             inventory.setItem(15, createItem("§e직업능력", Material.BED));
         } else if (ability.getAbilityType() == Ability.Type.POLICE) {
             inventory.setItem(15, createItem("§d직업능력", Material.STICK));
+        } else if (ability.getAbilityType() == Ability.Type.SPY) {
+            inventory.setItem(15, createItem("§4직업능력", Material.DIAMOND));
         }
 
         for (int i = 0; i < 9; i++) {
@@ -172,7 +174,6 @@ public class GameInventory {
         gamePlayer.getPlayer().updateInventory();
         gamePlayer.getPlayer().openInventory(mainInventory(inventory, gamePlayer.getPlayer()));
 
-        return;
     }
 
     public void showVoteInventory(GamePlayer gamePlayer) {
@@ -180,28 +181,32 @@ public class GameInventory {
         gamePlayer.getPlayer().updateInventory();
         gamePlayer.getPlayer().openInventory(voteInventory(inventory, gamePlayer.getPlayer()));
 
-        return;
     }
 
     public void showMafiaInventory(GamePlayer gamePlayer) {
         gamePlayer.getPlayer().updateInventory();
         gamePlayer.getPlayer().openInventory(mafiaInventory(inventory, gamePlayer.getPlayer()));
 
-        return;
     }
 
     public void showDoctorInventory(GamePlayer gamePlayer) {
         gamePlayer.getPlayer().updateInventory();
         gamePlayer.getPlayer().openInventory(doctorInventory(inventory, gamePlayer.getPlayer()));
 
-        return;
     }
 
     public void showPoliceInventory(GamePlayer gamePlayer) {
         gamePlayer.getPlayer().updateInventory();
         gamePlayer.getPlayer().openInventory(policeInventory(inventory, gamePlayer.getPlayer()));
 
-        return;
     }
+
+    public void showSpyInventory(GamePlayer gamePlayer)
+    {
+
+        gamePlayer.getPlayer().updateInventory();
+        gamePlayer.getPlayer().openInventory(spyInventory(inventory, gamePlayer.getPlayer()));
+    }
+
 
 }

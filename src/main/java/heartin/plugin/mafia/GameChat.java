@@ -26,9 +26,9 @@ public class GameChat {
 
             playerChat.put(gamePlayer, mode);
 
-            gamePlayer.getPlayer().sendMessage("§e채팅모드 §c: §r§l" + mode);
+            gamePlayer.getPlayer().sendMessage(Message.SYSTEM + "§e채팅모드 §c: §r§l" + mode);
         } else {
-            player.sendMessage("마피아만 사용할 수 있습니다.");
+            player.sendMessage(Message.SYSTEM + "마피아만 사용할 수 있습니다.");
         }
 
 

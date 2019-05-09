@@ -103,7 +103,7 @@ public final class GamePlayerManager {
             return;
 
         process.getChat().clearChat();
-        process.getPlugin().getServer().broadcastMessage("시민 승리");
+        process.getPlugin().getServer().broadcastMessage(Message.SYSTEM + "시민 승리");
         process.getPlugin().processStop();
         process.getScheduler().remainbar.removeAll();
 
@@ -113,7 +113,7 @@ public final class GamePlayerManager {
         if (this.getOnlineCitizen().size() > 0)
             return;
         process.getChat().clearChat();
-        process.getPlugin().getServer().broadcastMessage("마피아 승리");
+        process.getPlugin().getServer().broadcastMessage (Message.SYSTEM + "마피아 승리");
         process.getPlugin().processStop();
         process.getScheduler().remainbar.removeAll();
     }
